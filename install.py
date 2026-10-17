@@ -44,6 +44,7 @@ def main() -> int:
     for sk in sorted(p for p in (HERE / "skills").iterdir() if (p / "SKILL.md").exists()):
         do(f"install /{sk.name} skill -> {skills_dir / sk.name / 'SKILL.md'}", lambda sk=sk: ((skills_dir / sk.name).mkdir(parents=True, exist_ok=True), shutil.copy2(sk / "SKILL.md", skills_dir / sk.name / "SKILL.md")))
     do(f"copy README.md and the docs -> {cal}", lambda: [shutil.copy2(HERE / n, cal / n) for n in ("README.md", "docs-chat-links.md", "docs-project-prioritization.md")])
+    do(f"copy the waiting-chat brief -> {cal / 'waiting-chat-brief.md'}", lambda: shutil.copy2(HERE / "templates" / "waiting-chat-brief.md", cal / "waiting-chat-brief.md"))
     do(f"copy pets.json -> {cal / 'pets.json'}", lambda: shutil.copy2(HERE / "pets.json", cal / "pets.json"))
     chosen = "none" if a.no_pet else a.pet
     if chosen is not None or not (cal / "config.json").exists():

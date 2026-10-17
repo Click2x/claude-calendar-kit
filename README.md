@@ -87,6 +87,7 @@ flowchart LR
 | **`auto` tasks** | You pre-authorized exactly what the prompt says. Anything needing money, accounts, credentials or irreversible steps is blocked for you, never run. |
 | **Review** | Status `review` means finished but needs you. It does not block dependents. |
 | **Follow-ups** | `done --followup "TITLE|PROMPT|auto|LANE"` or `cal.py followup` creates the next step, inheriting project, folder and lane. |
+| **Waiting items get a chat** | Anything waiting on you with no chat gets one created automatically (`cal.py needchat` lists them; `/next` and the dispatcher create them), so every "waiting on you" item has a link. |
 | **Chat links** | `cal.py attach ID SESSION` links a task to its chat. Follow-ups inherit it, `cal.py` prints `-> chat: [title](#session)` for you to paste, and Claude is told to include one for anything waiting on you. See [`docs-chat-links.md`](docs-chat-links.md). |
 
 ## What is in the box

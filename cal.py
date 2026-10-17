@@ -22,6 +22,7 @@ Claude Calendar - one shared task calendar for ALL of your projects. Plain JSON,
   python cal.py pet [list|say|on|off|set STYLE [--name NAME]]   your calendar pet: pick a style, rename it, or hear what it has to say
   python cal.py sort [--apply]                          re-sort by priority (overdue, unblocks others, waiting on you, quick wins); preview unless --apply
   python cal.py config [get|set KEY VALUE]              settings in config.json (pet, petEnabled, artifactUrl)
+  python cal.py needchat [--json] [--limit N]           things waiting on you that have no chat yet (the /next skill and the dispatcher create one for each)
   python cal.py reviews                                 everything waiting on the owner (review + due owner tasks)
   python cal.py force ID                                run this task NOW: ignore its due time, dependencies and notBefore (set by the page's Run now button)
   python cal.py replan [--from WHEN]                    recompute due times: every task starts as soon as its deps and lane are free
@@ -362,6 +363,7 @@ def main() -> int:
     p = sub.add_parser("force"); p.add_argument("id")
     p = sub.add_parser("ready"); p.add_argument("--json", action="store_true")
     sub.add_parser("reviews")
+    p = sub.add_parser("needchat"); p.add_argument("--json", action="store_true"); p.add_argument("--limit", type=int, default=5)
     p = sub.add_parser("sort"); p.add_argument("--apply", action="store_true", help="write the new priority order (otherwise just show it)")
     p = sub.add_parser("config"); p.add_argument("action", nargs="?", default="get", choices=["get", "set"]); p.add_argument("key", nargs="?"); p.add_argument("value", nargs="?")
     p = sub.add_parser("pet"); p.add_argument("action", nargs="?", default="list", choices=["list", "set", "say", "off", "on"]); p.add_argument("style", nargs="?"); p.add_argument("--name")
@@ -530,6 +532,14 @@ def main() -> int:
             cfg[a.key] = a.value if a.value not in ("true", "false") else (a.value == "true")
             CONFIG_FILE.write_text(json.dumps(cfg, indent=2, ensure_ascii=False), encoding="utf-8")
         print(json.dumps(cfg, indent=2, ensure_ascii=False) if not a.key or a.action == "set" else json.dumps(cfg.get(a.key)))
+    elif a.cmd == "needchat":
+        waiting = [t for t in db["tasks"] if not t.get("session") and (t["status"] == "review" or (t["status"] == "open" and (t.get("lane") or "") == "owner" and due_dt(t) <= now() and deps_met(db, t)))]
+        waiting.sort(key=lambda t: (t.get("prio", 50), due_dt(t)))
+        waiting = waiting[: a.limit]
+        if a.json:
+            print(json.dumps([{k: t.get(k) for k in ("id", "title", "project", "cwd", "status", "prompt", "result", "notes")} for t in waiting], indent=2, ensure_ascii=False))
+        else:
+            print("\n".join(fmt(t) for t in waiting) or "(every waiting item already has a chat)")
     elif a.cmd == "reviews":
         rv = [t for t in db["tasks"] if t["status"] == "review"]
         mine = [t for t in db["tasks"] if t["status"] == "open" and t.get("lane") == "owner" and due_dt(t) <= now() and deps_met(db, t)]
