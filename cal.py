@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Claude Calendar - one shared task calendar for ALL of your projects. Plain JSON, stdlib only, private to this machine.
+Claude Calendar - one shared task calendar for ALL of the owner's projects. Plain JSON, stdlib only, private to this machine.
 
   python cal.py list   [--project NAME] [--all]        open tasks (soonest first); --all adds done/skipped
   python cal.py due    [--project NAME] [--json]       open tasks that are due now or overdue
@@ -11,7 +11,8 @@ Claude Calendar - one shared task calendar for ALL of your projects. Plain JSON,
   python cal.py skip ID [--result TEXT]
   python cal.py note ID TEXT                            append a note
   python cal.py ready  [--json]                         auto tasks that can start NOW (deps met, due passed, lane free)
-  python cal.py start ID                                mark running (the dispatcher calls this before launching a session)
+  python cal.py attach ID SESSION_ID                    link the task to the chat session working on it (the page then shows an Open chat link)
+  python cal.py start ID [--session SESSION_ID]                                mark running (the dispatcher calls this before launching a session)
   python cal.py followup ID --title T [--prompt P] [--auto] [--lane L] [--est H] [--review]   add the next step after task ID (inherits project/cwd/lane, waits on ID)
   done/review/reviewed also take --followup "TITLE|PROMPT|auto|LANE" (repeatable) and create declared `followups` templates
   python cal.py review ID --result TEXT                 auto work finished but needs the owner: status review (does not block dependents)
@@ -227,7 +228,8 @@ def main() -> int:
                                        help="create the next step on the calendar when this completes (repeatable)")
     p = sub.add_parser("followup"); p.add_argument("id"); p.add_argument("--title", required=True); p.add_argument("--prompt", default="")
     p.add_argument("--auto", action="store_true"); p.add_argument("--lane"); p.add_argument("--est", type=float); p.add_argument("--review", action="store_true")
-    p = sub.add_parser("start"); p.add_argument("id")
+    p = sub.add_parser("start"); p.add_argument("id"); p.add_argument("--session")
+    p = sub.add_parser("attach"); p.add_argument("id"); p.add_argument("session"); p.add_argument("--title", default="")
     p = sub.add_parser("force"); p.add_argument("id")
     p = sub.add_parser("ready"); p.add_argument("--json", action="store_true")
     sub.add_parser("reviews")
@@ -280,6 +282,13 @@ def main() -> int:
         print(fmt(t))
     elif a.cmd == "start":
         t = find(db, a.id); t["status"] = "running"; t["forced"] = False; t["startedAt"] = now().replace(microsecond=0).isoformat()
+        if a.session:
+            t["session"] = a.session
+        save(db); print(fmt(t))
+    elif a.cmd == "attach":
+        t = find(db, a.id); t["session"] = a.session
+        if a.title:
+            t["sessionTitle"] = a.title
         save(db); print(fmt(t))
     elif a.cmd == "followup":
         t = find(db, a.id)

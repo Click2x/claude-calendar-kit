@@ -69,6 +69,8 @@ button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--acc
 .next .row:first-of-type{border-top:0}
 .next .w{font-family:var(--mono);font-size:.75rem;color:var(--muted)}
 .next .row.late .w{color:var(--late)}
+.chatrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:2px}.chatname{font-size:.85rem;color:var(--accent)}.chatcopy{font-size:.75rem}
+.chatlink{align-self:flex-start;font-size:.85rem;color:var(--accent);margin-top:2px}.item.late .chatlink{color:var(--accent)}
 .runbtn{align-self:flex-start;margin-top:4px;border-color:var(--auto);color:var(--auto)}.runbtn:disabled{opacity:.6;cursor:default}
 .pet{display:flex;align-items:center;gap:12px;background:var(--auto-soft)}.petface{font-size:1.4rem;white-space:nowrap}.petmsg{font-size:.9rem}
 .foot{color:var(--muted);font-size:.75rem}
@@ -132,6 +134,12 @@ function outline(){
     var ch=el('div','chips');ch.appendChild(el('span','chip '+(t.auto?'auto':''),kind(t)));
     ch.appendChild(el('span','chip '+(t.status==='done'?'done':t.status==='blocked'||t.status==='review'||isLate(t)?'late':''),isLate(t)?'overdue':t.status));
     it.appendChild(ch);
+    if(t.session){var cw=el('div','chatrow'),url='claude://claude.ai/epitaxy/'+t.session;
+      cw.appendChild(el('span','chatname',(t.status==='review'?'Waiting for you in chat: ':'Chat: ')+(t.sessionTitle||t.session)));
+      var cb=el('button','chatcopy','Copy chat link');cb.type='button';
+      (function(u,b){b.onclick=function(){var done=function(ok){b.textContent=ok?'Copied ✓ paste in your browser bar':'Select and copy: '+u;if(!ok){var inp=el('input');inp.value=u;inp.readOnly=true;inp.style.width='100%';b.parentNode.appendChild(inp);inp.select()}};
+        try{navigator.clipboard.writeText(u).then(function(){done(true)},function(){done(false)})}catch(e){done(false)}}})(url,cb);
+      cw.appendChild(cb);it.appendChild(cw)}
     var more=[];if(t.prompt)more.push(['What to do',t.prompt]);if(t.result)more.push(['Result',t.result]);
     (t.notes||[]).forEach(function(n){more.push(['Note',n.text])});
     if(t.sched)more.push(['Scheduled task',t.sched]);
@@ -199,7 +207,7 @@ render();
 def main() -> int:
     db = json.loads((HERE / "tasks.json").read_text(encoding="utf-8"))
     now = datetime.now().astimezone()
-    keep = ("id", "title", "project", "due", "status", "auto", "repeat", "prompt", "result", "notes")
+    keep = ("id", "title", "project", "due", "status", "auto", "repeat", "prompt", "result", "notes", "session", "sessionTitle")
     tasks = []
     for t in db["tasks"]:
         o = {k: t.get(k) for k in keep}
