@@ -6,6 +6,7 @@ One task calendar for all of your projects, built for use with Claude Code. Plai
 - `render_html.py` renders a self-contained interactive calendar page (month view, day outline, up-next list, and a small mascot that reacts to your task state).
 - `templates/calendar-runner.SKILL.md` is a dispatcher you run as a scheduled task: it replans, starts ready tasks (one per lane) and tells you when something needs your review.
 - `docs-project-prioritization.md` describes a companion project that surfaces received messages, cleans up the calendar and suggests projects.
+- `skills/next/SKILL.md` is a `/next` skill: copy it to `~/.claude/skills/next/`. Type `/next` in any chat to see what is waiting on you, running and ready, with links to the chats, then it asks what you actually want (or whether to build something new).
 - `SETUP_PROMPT.md` is a prompt that sets all of this up for you.
 
 ## Ideas
