@@ -3,6 +3,8 @@ name: pet
 description: Choose, rename, or turn off the calendar pet. Use when the user types /pet or asks to change the pet's style, name, or to turn the pet on or off.
 ---
 
+Run every `cal.py` command from `~/.claude/calendar` (or give its full path).
+
 The user typed /pet. Their calendar has an optional pet that reacts to their tasks and speaks in the calendar page and at the top of /next. Use the calendar CLI (default folder ~/.claude/calendar).
 
 1. Run `python cal.py pet` to list the styles (the current one is marked, and it says if the pet is off).

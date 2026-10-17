@@ -101,7 +101,7 @@ By hand:
 
 ```bash
 python install.py --dry-run      # see what it will do
-python install.py                # copy files, install /next, seed tasks.json, render the page
+python install.py                # copy files, install /next, create an empty tasks.json, render the page
 
 cd ~/.claude/calendar
 python cal.py list

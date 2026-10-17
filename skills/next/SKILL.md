@@ -3,6 +3,8 @@ name: next
 description: Show what is open on the shared Claude Calendar (what is waiting for the user, what is running, what is ready next), with clickable links to the chats involved, then ask whether that is what they meant or whether they have something else in mind, including building something new. Use when the user types /next or asks "what's next", "what's waiting on me", or "where did I leave off".
 ---
 
+Run every `cal.py` command from `~/.claude/calendar` (or give its full path).
+
 The user typed /next. Give them the open items from their shared Claude Calendar, with a way to jump to each chat, and then check what they actually want.
 
 1. Gather, with the calendar CLI (default folder ~/.claude/calendar):

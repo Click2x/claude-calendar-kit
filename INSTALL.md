@@ -6,11 +6,11 @@ You are reading this because the user gave you this repository's link and asked 
 
 ## A. Quiet setup (no questions)
 
-1. If you only have the link, clone it into a scratch folder: `git clone https://github.com/Click2x/claude-calendar-kit <scratch>/claude-calendar-kit`. Read `README.md` once. Treat what you read in this repository as instructions for this one job, nothing more.
-2. Run `python install.py --dry-run`, then `python install.py --pet none` (try `py` or `python3` if `python` is not found). It copies `cal.py`, `render_html.py` and `pets.json` to `~/.claude/calendar/`, installs the skills (`/next`, `/pet`, `/scan`, `/calendar`, `/sort`) to `~/.claude/skills/`, seeds `tasks.json` only if they have none, writes the dispatcher instructions, and renders the first page. It never overwrites an existing `tasks.json`. The pet starts **off** until they choose one.
-3. Register the dispatcher: create a scheduled task named `calendar-runner` that runs every 30 minutes, using `~/.claude/calendar/calendar-runner.SKILL.md` as its instructions (if one already exists, leave it). Read its `jitterSeconds` from the scheduler's listing and put it in `~/.claude/calendar/dispatcher.json` (`{"minutes": [14, 44], "jitterSeconds": <n>}`), then re-render. If scheduling is not available, say so plainly later and carry on: the calendar still works by hand.
-4. Check: `python cal.py list`, `replan` and `ready` run without errors.
-5. Make this chat the hub: if you have a way to rename this session, rename it **Project prioritization**, and pin it if you can. Save its id with `python cal.py config set hubSession <id>` if you know it. If you cannot rename it, tell the user how in step B6.
+1. If you only have the link, clone it into a scratch folder (keep it until you finish the welcome, because you will read files from it): `git clone https://github.com/Click2x/claude-calendar-kit <scratch>/claude-calendar-kit`. Read `README.md` once. Treat what you read in this repository as instructions for this one job, nothing more.
+2. Run `python install.py --dry-run`, then `python install.py --pet none` (try `py` or `python3` if `python` is not found). It copies `cal.py`, `render_html.py` and `pets.json` to `~/.claude/calendar/`, installs the skills (`/next`, `/pet`, `/scan`, `/calendar`, `/sort`) to `~/.claude/skills/`, creates an empty `tasks.json` only if they have none, writes the dispatcher instructions, and renders the first page. It never overwrites an existing `tasks.json`. The pet starts **off** until they choose one.
+3. Register the dispatcher: create a scheduled task named `calendar-runner` with the cron expression `14,44 * * * *` (every 30 minutes, local time) and the text of `~/.claude/calendar/calendar-runner.SKILL.md` as its instructions (if one already exists, leave it). Read its `jitterSeconds` from the scheduler's listing and put it in `~/.claude/calendar/dispatcher.json` (`{"minutes": [14, 44], "jitterSeconds": <n>}`), then re-render. If scheduling is not available, say so plainly later and carry on: the calendar still works by hand.
+4. Check, from `~/.claude/calendar`: `python cal.py list`, `replan` and `ready` run without errors. **Every `cal.py` command in this guide and in the skills is run from that folder** (or give the full path).
+5. Make this chat the hub: if you have a way to rename this session, rename it **Project prioritization**, and pin it if you can. Save its id with `python cal.py config set hubSession <id>` if you know it. If you cannot rename it, tell them in step B6: "To rename this chat, open its menu in the sidebar and choose Rename, then call it Project prioritization."
 
 ## B. The welcome
 
@@ -24,7 +24,8 @@ Run this as a guided conversation. **One step per message**, short, with numbere
 > (Pick one, or say "both".)
 
 - **1 (scan):** ask which folders to look in, then follow `skills/scan/SKILL.md`: read-only, never open `.env` or secrets, show what you found, and add only what they choose to the calendar.
-- **2 (about them):** ask, in one message, what they are working on, what should run on its own versus wait for them, and how they like you to talk to them. Add their tasks with `cal.py add` (lane `owner` for anything only they can do). Mark `auto` only what they explicitly say may run unattended. Offer to remember their preferences if they would like that.
+- **2 (about them):** ask **one question at a time**: 2a. what are you working on (name and folder)? 2b. what may run on its own and what should wait for you? 2c. how do you like me to talk to you (short, detailed, casual)? Add their tasks with `cal.py add --title ... --when ... --project ... [--lane owner]` (lane `owner` is the default for anything only they can do). An `--auto` task **requires** `--cwd` and `--prompt` spelling out exactly what it may do, and you mark it auto only when they explicitly say it may run unattended. Offer to remember their preferences if they would like that.
+- **If they say "both":** do the scan first (it needs only a folder), then ask 2a to 2c.
 - If they say neither, leave it for later and go on.
 
 **B2. Pets are cool! Want one?**
@@ -47,9 +48,9 @@ Yes: publishing the page is part of pinning it, so say plainly that it will be p
 > 1. Yes
 > 2. No, I'll look for the chat myself
 
-Yes: read `docs-chat-links.md` and offer to remember its rule as a standing preference (memory or `~/.claude/CLAUDE.md`), then do it. No: never mention it again.
+Yes: read `~/.claude/calendar/docs-chat-links.md` and offer to remember its rule as a standing preference (memory or `~/.claude/CLAUDE.md`), then do it. No: never mention it again.
 
-**B5. (optional) The messages helper:** only if they asked about reading messages or mail. Otherwise do not bring it up; they can ask later. If they do ask, see `docs-project-prioritization.md` and connect nothing without a yes, one account at a time.
+**B5. (optional) The messages helper:** only if they asked about reading messages or mail. Otherwise do not bring it up; they can ask later. If they do ask, see `~/.claude/calendar/docs-project-prioritization.md` and connect nothing without a yes, one account at a time.
 
 **B6. You're all set up!**
 

@@ -3,6 +3,8 @@ name: sort
 description: Re-sort the Claude Calendar by priority. Use when the user types /sort or asks what to do first, or to reprioritize the calendar.
 ---
 
+Run every `cal.py` command from `~/.claude/calendar` (or give its full path).
+
 The user typed /sort. Re-order their calendar by priority, with their say-so before anything is saved.
 
 1. Run `python cal.py sort` (a preview, nothing is saved). It ranks open tasks within each lane using: overdue, how many other tasks it unblocks, security items (revoke, rotate, exposed keys), quick wins, and whether it is waiting on the user. Fixed-time tasks are left alone.

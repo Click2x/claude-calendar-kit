@@ -316,6 +316,10 @@ def main() -> int:
     p.add_argument("--title", required=True); p.add_argument("--when", required=True); p.add_argument("--project", default="general")
     p.add_argument("--cwd", default=""); p.add_argument("--prompt", default=""); p.add_argument("--auto", action="store_true")
     p.add_argument("--repeat", choices=["daily", "weekly", "monthly"]); p.add_argument("--scheduled-task", dest="sched")
+    p.add_argument("--lane", help="owner (only you can do it) or a resource lane such as cpu/gpu; default: owner, or main for --auto")
+    p.add_argument("--est", type=float, help="estimated hours"); p.add_argument("--prio", type=int, help="lower runs first")
+    p.add_argument("--after", action="append", default=[], metavar="ID", help="task id this one waits for (repeatable)")
+    p.add_argument("--review", action="store_true", help="when it finishes, mark it for your review instead of done")
     for name in ("show", "done", "skip", "block"):
         p = sub.add_parser(name); p.add_argument("id")
         if name != "show":
@@ -352,10 +356,26 @@ def main() -> int:
         else:
             print("\n".join(fmt(t) for t in ts) or "(none)")
     elif a.cmd == "add":
-        t = {"id": next_id(db), "title": a.title, "project": a.project, "cwd": a.cwd, "due": parse_when(a.when), "repeat": a.repeat,
+        if a.auto and not (a.cwd and a.prompt):
+            sys.exit("an --auto task runs unattended, so it needs --cwd (the folder to work in) and --prompt (exactly what it may do)")
+        cwd = str(Path(a.cwd).expanduser()) if a.cwd else ""
+        due = parse_when(a.when)
+        t = {"id": next_id(db), "title": a.title, "project": a.project, "cwd": cwd, "due": due, "repeat": a.repeat,
              "prompt": a.prompt, "auto": bool(a.auto), "status": "open", "createdAt": now().replace(microsecond=0).isoformat(),
-             "scheduledTaskId": a.sched, "notes": [], "result": None, "doneAt": None}
+             "scheduledTaskId": a.sched, "notes": [], "result": None, "doneAt": None,
+             "lane": a.lane or ("main" if a.auto else "owner")}
+        if a.est:
+            t["est"] = a.est
+        if a.prio is not None:
+            t["prio"] = a.prio
+        if a.after:
+            t["after"] = a.after
+        if a.review:
+            t["reviewOnDone"] = True
+        if datetime.fromisoformat(due) > now() + timedelta(hours=1):
+            t["notBefore"] = due  # a date you chose in the future is a floor: replan never pulls it earlier
         db["tasks"].append(t)
+        replan(db, now())
         save(db)
         print(fmt(t))
     elif a.cmd == "show":
@@ -440,6 +460,7 @@ def main() -> int:
             if a.style not in pets["styles"]:
                 sys.exit("unknown style; choose one of: " + ", ".join(pets["styles"]))
             cfg["pet"] = a.style
+            cfg["petEnabled"] = True
             if a.name:
                 cfg["petName"] = a.name
             elif "petName" in cfg:
@@ -448,7 +469,8 @@ def main() -> int:
             print("pet set to " + a.style + ": " + pet_say(db))
         else:
             for k, v in pets["styles"].items():
-                print(("* " if k == cur else "  ") + f"{k:<8} {v['faces'].get('idle', ''):<10} {v['label']} - {v['blurb']}")
+                print(("* " if (k == cur and cfg.get("petEnabled") is not False) else "  ") + f"{k:<8} {v['faces'].get('idle', ''):<10} {v['label']} - {v['blurb']}")
+            print("(faces shown are the calm 'idle' face; the pet's face changes with your tasks)")
             print("\nchoose with: cal.py pet set STYLE [--name NAME]    opt out with: cal.py pet off" + ("    [pet is currently OFF]" if cfg.get("petEnabled") is False else "") + "    (the page also has a Change pet picker)")
     elif a.cmd == "sort":
         plan = sort_plan(db)

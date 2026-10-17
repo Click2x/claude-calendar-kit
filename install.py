@@ -24,7 +24,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--home", default=str(Path.home()), help="home directory to install under (default: your home)")
     ap.add_argument("--project-dir", help="also create the Project prioritization folder here")
-    ap.add_argument("--pet", default="none", help="pet style to start with (waifu, kitten, robot, blob, emoji, plain), or 'none' for no pet (see pets.json; change any time with cal.py pet)")
+    ap.add_argument("--pet", default=None, help="pet style to start with (waifu, kitten, robot, blob, emoji, plain), or 'none' for no pet (default: none until you choose) (see pets.json; change any time with cal.py pet)")
     ap.add_argument("--no-pet", action="store_true", help="same as --pet none")
     ap.add_argument("--dry-run", action="store_true", help="show what would happen and change nothing")
     a = ap.parse_args()
@@ -43,13 +43,15 @@ def main() -> int:
     skills_dir = home / ".claude" / "skills"
     for sk in sorted(p for p in (HERE / "skills").iterdir() if (p / "SKILL.md").exists()):
         do(f"install /{sk.name} skill -> {skills_dir / sk.name / 'SKILL.md'}", lambda sk=sk: ((skills_dir / sk.name).mkdir(parents=True, exist_ok=True), shutil.copy2(sk / "SKILL.md", skills_dir / sk.name / "SKILL.md")))
+    do(f"copy README.md and the docs -> {cal}", lambda: [shutil.copy2(HERE / n, cal / n) for n in ("README.md", "docs-chat-links.md", "docs-project-prioritization.md")])
     do(f"copy pets.json -> {cal / 'pets.json'}", lambda: shutil.copy2(HERE / "pets.json", cal / "pets.json"))
-    if not (cal / "config.json").exists():
-        off = a.no_pet or a.pet.lower() in ("none", "off")
-        cfg = json.dumps({"petEnabled": False} if off else {"pet": a.pet, "petEnabled": True}) + chr(10)
-        do(f"write {cal / 'config.json'} ({'no pet' if off else 'pet style ' + a.pet})", lambda: (cal / "config.json").write_text(cfg, encoding="utf-8"))
+    chosen = "none" if a.no_pet else a.pet
+    if chosen is not None or not (cal / "config.json").exists():
+        off = (chosen or "none").lower() in ("none", "off")
+        cfg = {"petEnabled": False} if off else {"pet": chosen, "petEnabled": True}
+        do(f"write {cal / 'config.json'} ({'no pet' if off else 'pet style ' + chosen})", lambda: (cal / "config.json").write_text(json.dumps(cfg) + chr(10), encoding="utf-8"))
     if not (cal / "tasks.json").exists():
-        do(f"seed {cal / 'tasks.json'} from the example (edit it to your projects)", lambda: shutil.copy2(HERE / "examples" / "tasks.example.json", cal / "tasks.json"))
+        do(f"create an empty {cal / 'tasks.json'} (your calendar starts empty; examples/ has samples to copy from)", lambda: (cal / "tasks.json").write_text('{"version": 1, "tasks": []}', encoding="utf-8"))
     else:
         log.append(f"kept your existing {cal / 'tasks.json'}")
 

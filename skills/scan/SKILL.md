@@ -3,6 +3,8 @@ name: scan
 description: Scan the user's project folders (read-only), summarize what is there and how recently each was touched, and offer to put the ones they care about on the calendar. Use when the user types /scan or asks Claude to find their projects.
 ---
 
+Run every `cal.py` command from `~/.claude/calendar` (or give its full path).
+
 The user typed /scan. Find their projects and offer to track them on the shared Claude Calendar. This is read-only until they say yes to adding something.
 
 1. **Where to look.** If you do not already know, ask once which folders to scan (suggest `~/Documents`, `~/projects`, `~/code`, `~/dev`; skip anything they exclude). Scan only those, one or two levels deep.

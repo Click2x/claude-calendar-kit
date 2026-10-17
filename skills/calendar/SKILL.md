@@ -3,6 +3,8 @@ name: calendar
 description: Bring up the user's Claude Calendar page. Use when the user types /calendar or asks to see, open or pin their calendar.
 ---
 
+Run every `cal.py` command from `~/.claude/calendar` (or give its full path).
+
 The user typed /calendar. Show them their calendar page (default folder ~/.claude/calendar).
 
 1. Read where it lives: `python cal.py config get artifactUrl`.
