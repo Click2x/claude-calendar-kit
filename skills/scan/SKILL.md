@@ -3,7 +3,7 @@ name: scan
 description: Scan the user's project folders (read-only), summarize what is there and how recently each was touched, and offer to put the ones they care about on the calendar. Use when the user types /scan or asks Claude to find their projects.
 ---
 
-Run every `cal.py` command from `~/.claude/calendar` (or give its full path).
+Run every `cal.py` command from `~/.claude/calendar` (or give its full path). Whenever a `cal.py` command changes the calendar and prints a note about republishing, republish `calendar.html` to the same artifact URL, in place, before you reply, so the user never has to ask you to update the calendar.
 
 The user typed /scan. Find their projects and offer to track them on the shared Claude Calendar. This is read-only until they say yes to adding something.
 

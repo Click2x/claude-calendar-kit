@@ -1,0 +1,1 @@
+{ "name": "calendar-pet", "version": "0.1.0", "description": "Shows your Claude Calendar pet above the prompt box. It speaks the same line as `cal.py pet say`, and stays out of the way if you have no pet.", "author": { "name": "Click2x" }, "types": "./types/index.d.ts" }

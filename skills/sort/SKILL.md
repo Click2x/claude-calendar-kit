@@ -3,7 +3,7 @@ name: sort
 description: Re-sort the Claude Calendar by priority. Use when the user types /sort or asks what to do first, or to reprioritize the calendar.
 ---
 
-Run every `cal.py` command from `~/.claude/calendar` (or give its full path).
+Run every `cal.py` command from `~/.claude/calendar` (or give its full path). Whenever a `cal.py` command changes the calendar and prints a note about republishing, republish `calendar.html` to the same artifact URL, in place, before you reply, so the user never has to ask you to update the calendar.
 
 The user typed /sort. Re-order their calendar by priority, with their say-so before anything is saved.
 

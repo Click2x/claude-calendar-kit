@@ -56,7 +56,12 @@ def load() -> dict:
     return json.loads(FILE.read_text(encoding="utf-8"))
 
 
+_SAVED = False
+
+
 def save(db: dict) -> None:
+    global _SAVED
+    _SAVED = True
     fd, tmp = tempfile.mkstemp(dir=FILE.parent, suffix=".tmp")
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         json.dump(db, f, indent=2, ensure_ascii=False)
@@ -542,5 +547,19 @@ def main() -> int:
     return 0
 
 
+def refresh_page() -> None:
+    """After any change to the tasks: re-render the local calendar.html, and say so if a published copy needs republishing."""
+    import subprocess
+    r = FILE.parent / "render_html.py"
+    if r.exists():
+        subprocess.run([sys.executable, str(r)], capture_output=True, text=True)
+    url = load_cfg().get("artifactUrl")
+    if url:
+        print(f"(calendar.html is refreshed. The published page does not update itself: republish {FILE.parent / 'calendar.html'} to {url} in place.)")
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    rc = main()
+    if _SAVED and rc == 0:
+        refresh_page()
+    sys.exit(rc)

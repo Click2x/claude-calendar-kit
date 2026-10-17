@@ -1,0 +1,8 @@
+{
+  "name": "claude-calendar-kit",
+  "description": "Add-ons for the Claude Calendar kit.",
+  "owner": { "name": "Click2x" },
+  "plugins": [
+    { "name": "calendar-pet", "source": "./mods/calendar-pet", "description": "Shows your Claude Calendar pet above the prompt box." }
+  ]
+}

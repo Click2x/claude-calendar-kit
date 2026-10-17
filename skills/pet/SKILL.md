@@ -13,4 +13,5 @@ The user typed /pet. Their calendar has an optional pet that reacts to their tas
    - `python cal.py pet off` (opt out: no pet on the page or in /next) or `python cal.py pet on`
    Then show `python cal.py pet say` so they hear it in its new voice.
 3. If they gave nothing, show the styles as a short list with each style's face and one-line personality, say which is current, and ask which they want, or whether they would rather have no pet. Keep it light. The page also has a Change pet picker, and that choice is remembered per browser.
-4. Never pick for them. Opting out is always fine and needs no explanation.
+4. If they want the pet above the text box (they ask, or they have a pet but do not see it there), it is the `calendar-pet` add-on: `claude plugin install calendar-pet --marketplace Click2x/claude-calendar-kit` (answer `y` to adding the marketplace), or in the app: **+** next to the prompt box, **Plugins**, **Add marketplace** `Click2x/claude-calendar-kit`, **Add plugin**. Ask first; it installs a plugin.
+5. Never pick for them. Opting out is always fine and needs no explanation.

@@ -42,6 +42,18 @@ The chat you pasted the link into becomes your **Project prioritization** chat: 
 
 ---
 
+### 🐾 Pet above the text box (optional)
+
+The pet can sit right above your prompt box, always visible. Install the small add-on (INSTALL.md offers it when you pick a pet):
+
+```bash
+claude plugin install calendar-pet --marketplace Click2x/claude-calendar-kit
+```
+
+In a terminal session you can type `/plugin install calendar-pet --marketplace Click2x/claude-calendar-kit`. In the desktop app: click **+** next to the prompt box, then **Plugins**, **Add marketplace** with `Click2x/claude-calendar-kit`, then **Add plugin**. It shows the same line as `cal.py pet say` and disappears when you turn the pet off. The source is in [`mods/calendar-pet`](mods/calendar-pet).
+
+---
+
 ## Why
 
 When Claude can run work for you in the background, the bottleneck becomes **you**: what is waiting on your review, what is stuck, what should start next, and what you forgot. This kit gives every project one shared calendar that both you and Claude can read and write, and keeps work moving without losing time.

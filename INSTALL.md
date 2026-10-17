@@ -16,6 +16,8 @@ You are reading this because the user gave you this repository's link and asked 
 
 Run this as a guided conversation. **One step per message**, short, with numbered choices the user can answer with a digit or a few words. Match their tone. Skip any step they already answered. Never re-ask. Do not dump a list of open questions.
 
+**Keep the page current:** every `cal.py` command that changes tasks refreshes the local `calendar.html` by itself. If a published copy exists, `cal.py` then prints a line saying so: republish that file to the same artifact URL, in place, before you reply, so the user never has to ask you to update the calendar.
+
 **B1. Welcome to Claude Calendar! Let's get started**
 
 > 1. Let me scan for your projects
@@ -34,7 +36,7 @@ Run this as a guided conversation. **One step per message**, short, with numbere
 >    1A. What kind? (waifu, kitten, robot, blob, emoji, plain. Run `python cal.py pet` to show faces.)
 > 2. No
 
-Yes: `python cal.py pet set STYLE [--name NAME]`, then show `cal.py pet say`. No: `python cal.py pet off`, and never mention the pet again.
+Yes: `python cal.py pet set STYLE [--name NAME]`, then show `cal.py pet say`. Then offer once, in one line: **"Want your pet to sit above the text box too, so you see it all the time?"** On a yes, install the small `calendar-pet` add-on from this repository: `claude plugin install calendar-pet --marketplace Click2x/claude-calendar-kit` (answer `y` to adding the marketplace). If you cannot run that, tell them: in the Claude app click **+** next to the prompt box, then **Plugins**, **Add marketplace** with `Click2x/claude-calendar-kit`, then **Add plugin** `calendar-pet`. It shows the same line as `cal.py pet say`, and is active right away or in the next chat (a full restart is not needed). Installing it is a yes-first step like any other. If they decline the add-on only, keep the pet and do not ask again. **No (to the pet itself):** `python cal.py pet off`, and never mention the pet again.
 
 **B3. Should I pin the calendar for you?**
 
@@ -79,6 +81,7 @@ Then tell them, in a couple of plain lines, what you could not do (for example s
 
 - Connecting any account, or reading messages or mail.
 - Publishing anything anywhere, even privately.
+- Installing the `calendar-pet` add-on (it adds a marketplace and a plugin to their Claude).
 - Marking a task `auto`. Never mark `auto` anything that spends money, deletes data, or sends something on their behalf: block it for them.
 
 ## Never
