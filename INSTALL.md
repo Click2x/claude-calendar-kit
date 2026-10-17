@@ -62,7 +62,16 @@ Yes: read `~/.claude/calendar/docs-chat-links.md` and offer to remember its rule
 >
 > These instructions are always on your calendar.
 >
-> Skills load when a chat starts, so **open a new chat** and type `/next` to try it. This chat is now your **Project prioritization** chat. Come back to it any time.
+> This chat is now your **Project prioritization** chat. Come back to it any time.
+>
+> One last thing: skills load when Claude starts, so your new commands won't show up until it restarts. **Want to completely close and restart Claude so it can start over?**
+>
+> 1. Yes, I'll close and reopen it now (I can't restart it for you)
+> 2. No, I'll just open a new chat
+
+- Yes: tell them to quit Claude fully (not just close the window), reopen it, open this **Project prioritization** chat from the sidebar, and type `/next`. Your chats stay in the sidebar.
+- No: tell them to open a new chat and type `/next`. If a command does not appear, a full restart will fix it.
+- Never try to quit or restart the app yourself.
 
 Then tell them, in a couple of plain lines, what you could not do (for example scheduling, renaming this chat).
 

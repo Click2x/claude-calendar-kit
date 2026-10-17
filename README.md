@@ -28,7 +28,7 @@ It installs everything quietly, then walks you through a short welcome, one step
 2. **Pets are cool:** want one? Pick a style, or no thanks.
 3. **Pin the calendar?** Yes (it publishes the page privately and pins it) or no, you'll use `/calendar`.
 4. **Links to chats that need attention?** Yes or no.
-5. **You're all set:** your commands are listed (and always shown on the calendar page).
+5. **You're all set:** your commands are listed (and always shown on the calendar page), and it asks whether you want to completely close and restart Claude so the new commands load.
 
 The chat you pasted the link into becomes your **Project prioritization** chat: the place you come back to for `/next`, `/scan` and `/sort`. It asks before connecting any account, publishing anything or marking a task to run on its own.
 
