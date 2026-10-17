@@ -21,6 +21,10 @@ python install.py                    # does it (safe to re-run; never overwrites
 
 It copies `cal.py` and `render_html.py` to `~/.claude/calendar/`, installs the `/next` skill to `~/.claude/skills/next/`, seeds `tasks.json` from the example only if the user has none, writes `~/.claude/calendar/calendar-runner.SKILL.md` with the real path filled in, and renders the first page. If `python` is not found, try `py` or `python3`.
 
+## 1b. Ask about the pet (optional)
+
+The calendar has an optional pet that reacts to their tasks (it appears on the page and opens `/next`). Ask once, briefly: do they want one, and in which style? Run `python cal.py pet` to show the styles (waifu, kitten, robot, blob, emoji, plain). Setting is `python cal.py pet set STYLE [--name NAME]`. If they would rather have no pet, run `python cal.py pet off`, and never bring it up again. Pass `--pet STYLE` or `--no-pet` to `install.py` to set the choice during install.
+
 ## 2. Make it theirs
 
 Ask the user, in one short message, for what you cannot guess: which projects they are working on (name and folder), and what should happen automatically versus what needs them. Then:

@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "default": "waifu",
+  "styles": {
+    "waifu": {
+      "label": "Waifu",
+      "blurb": "Sweet, devoted, a little dramatic",
+      "name": "Mochi",
+      "faces": {"idle": "(｡･ω･｡)", "running": "(๑•̀ㅂ•́)و✧", "review": "(⌒▽⌒)♡", "blocked": "(´;ω;`)", "late": "(>_<)", "sleepy": "(－ω－) zzZ"},
+      "lines": {
+        "idle": ["All quiet. Waiting for you, master~", "{name} is here whenever you need her~"],
+        "running": ["{n} running right now. I'm cheering for them!", "Ganbare, ganbare! {n} in progress~"],
+        "review": ["{n} thing{s} ready for your review, master! Please look~", "Ahh, {n} waiting for you! Come see, come see~"],
+        "blocked": ["{n} task{s} blocked and needs you...", "Master... {n} is stuck. Help?"],
+        "late": ["{n} overdue... ganbatte!", "Um, {n} slipped past its time. It's okay, we can fix it!"],
+        "sleepy": ["Zzz... it's late. Everything can wait till morning~", "{name} is sleepy... go rest?"]
+      }
+    },
+    "kitten": {
+      "label": "Kitten",
+      "blurb": "Curious, a bit smug",
+      "name": "Miso",
+      "faces": {"idle": "(=^･ω･^=)", "running": "(=^‥^=)ﾉ", "review": "(=ↀωↀ=)!", "blocked": "(=ＴェＴ=)", "late": "(=；ェ；=)", "sleepy": "(-ω-) zzz"},
+      "lines": {
+        "idle": ["Nothing to do. I'm napping on your calendar.", "Purr. All clear."],
+        "running": ["{n} running. I'm watching them like a mouse.", "Busy busy. {n} going."],
+        "review": ["Mrrp! {n} ready for you to look at.", "I left {n} on your desk. Take a look."],
+        "blocked": ["{n} blocked. I knocked it off the table, sorry.", "Hiss. {n} stuck and needs you."],
+        "late": ["{n} overdue. I judge you softly.", "{n} late. Meow."],
+        "sleepy": ["Past bedtime. Curl up.", "Zzz. Go to sleep, human."]
+      }
+    },
+    "robot": {
+      "label": "Robot",
+      "blurb": "Dry, precise, reports facts",
+      "name": "UNIT-7",
+      "faces": {"idle": "[•_•]", "running": "[•̀_•́]⚙", "review": "[°o°]!", "blocked": "[×_×]", "late": "[!_!]", "sleepy": "[-_-] z"},
+      "lines": {
+        "idle": ["STATUS: nominal. Queue empty.", "All systems idle."],
+        "running": ["STATUS: {n} task{s} executing.", "Processing. {n} active."],
+        "review": ["ATTENTION: {n} item{s} awaiting human review.", "Review queue: {n}. Human input required."],
+        "blocked": ["ERROR: {n} task{s} blocked. Human input required.", "{n} blocked. Awaiting instructions."],
+        "late": ["WARNING: {n} overdue.", "Schedule breach: {n} item{s}."],
+        "sleepy": ["Low activity period. Recommend rest.", "Idle mode engaged."]
+      }
+    },
+    "blob": {
+      "label": "Blob",
+      "blurb": "Gentle, wobbly, encouraging",
+      "name": "Bloop",
+      "faces": {"idle": "( •ᴗ• )", "running": "( ˘▽˘ )ﾉ", "review": "( ◕ᴗ◕ )✿", "blocked": "( ´･_･` )", "late": "( ；ᴗ； )", "sleepy": "( ᴗ_ᴗ ) z"},
+      "lines": {
+        "idle": ["Bloop. Nothing needs you right now.", "Just a calm little blob, here with you."],
+        "running": ["{n} wobbling along nicely.", "Things are moving. {n} in progress."],
+        "review": ["{n} ready for you, no rush. Bloop!", "Whenever you like: {n} to look at."],
+        "blocked": ["{n} got stuck. We'll figure it out.", "Aw. {n} needs a hand."],
+        "late": ["{n} slipped by. That's okay.", "{n} overdue. Small steps."],
+        "sleepy": ["Time to squish into bed.", "Bloop... sleepy."]
+      }
+    },
+    "emoji": {
+      "label": "Emoji",
+      "blurb": "Just a face, minimal words",
+      "name": "Pip",
+      "faces": {"idle": "😌", "running": "🛠️", "review": "🔔", "blocked": "🛑", "late": "⏰", "sleepy": "😴"},
+      "lines": {
+        "idle": ["All clear.", "Nothing pending."],
+        "running": ["{n} running.", "{n} in progress."],
+        "review": ["{n} to review.", "{n} waiting on you."],
+        "blocked": ["{n} blocked.", "{n} stuck."],
+        "late": ["{n} overdue.", "{n} late."],
+        "sleepy": ["Late. Rest.", "Quiet hours."]
+      }
+    },
+    "plain": {
+      "label": "Plain",
+      "blurb": "No character, just the status",
+      "name": "Status",
+      "faces": {"idle": "", "running": "", "review": "", "blocked": "", "late": "", "sleepy": ""},
+      "lines": {
+        "idle": ["Nothing pending."],
+        "running": ["{n} running."],
+        "review": ["{n} waiting for your review."],
+        "blocked": ["{n} blocked."],
+        "late": ["{n} overdue."],
+        "sleepy": ["Nothing pending."]
+      }
+    }
+  }
+}

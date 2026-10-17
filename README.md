@@ -72,6 +72,7 @@ flowchart LR
 | [`docs-project-prioritization.md`](docs-project-prioritization.md) | A companion project that triages received messages, cleans up the calendar, nudges you about neglected projects and suggests new ones. |
 | [`INSTALL.md`](INSTALL.md) | Step-by-step install guide written for Claude to follow from the repo link alone. |
 | [`install.py`](install.py) | The installer: copies files, installs `/next`, seeds tasks, renders the first page. `--dry-run` shows what it would do. |
+| [`pets.json`](pets.json), [`skills/pet/`](skills/pet/SKILL.md) | An **optional** pet in six styles (waifu, kitten, robot, blob, emoji, plain). It reacts to your tasks on the page and opens `/next`. Pick a style on the page, with `/pet`, or `cal.py pet set STYLE`. Opt out any time with `cal.py pet off` or `install.py --no-pet`. |
 | [`SETUP_PROMPT.md`](SETUP_PROMPT.md) | A longer paste-in prompt, if you prefer that to the link. |
 | [`examples/tasks.example.json`](examples/tasks.example.json) | A starting `tasks.json`. |
 
@@ -96,6 +97,7 @@ Open a **new** chat afterwards: skills are loaded when a chat starts, so `/next`
 ## Everyday commands
 
 ```bash
+python cal.py pet                   # list pet styles; `pet set kitten --name Miso`, `pet say`, `pet off`
 python cal.py add --title "Write tests" --when tomorrow --project my-app --auto --lane cpu --prompt "..."
 python cal.py ready                 # auto tasks that can start now (one per free lane)
 python cal.py start ID --session SESSION_ID

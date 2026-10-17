@@ -17,6 +17,7 @@ Claude Calendar - one shared task calendar for ALL of the owner's projects. Plai
   done/review/reviewed also take --followup "TITLE|PROMPT|auto|LANE" (repeatable) and create declared `followups` templates
   python cal.py review ID --result TEXT                 auto work finished but needs the owner: status review (does not block dependents)
   python cal.py reviewed ID [--result TEXT]             owner finished reviewing / doing it: done, then replan (pulls dependents forward)
+  python cal.py pet [list|say|on|off|set STYLE [--name NAME]]   your calendar pet: pick a style, rename it, or hear what it has to say
   python cal.py reviews                                 everything waiting on the owner (review + due owner tasks)
   python cal.py force ID                                run this task NOW: ignore its due time, dependencies and notBefore (set by the page's Run now button)
   python cal.py replan [--from WHEN]                    recompute due times: every task starts as soon as its deps and lane are free
@@ -111,6 +112,48 @@ def advance(t: dict) -> str | None:
     while nd < now():
         nd += step
     return nd.isoformat()
+
+
+PETS_FILE = FILE.parent / "pets.json"
+CONFIG_FILE = FILE.parent / "config.json"
+
+
+def load_pets() -> dict:
+    return json.loads(PETS_FILE.read_text(encoding="utf-8")) if PETS_FILE.exists() else {"default": "plain", "styles": {"plain": {"label": "Plain", "blurb": "", "name": "Status", "faces": {}, "lines": {"idle": ["Nothing pending."]}}}}
+
+
+def load_cfg() -> dict:
+    try:
+        return json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def pet_state(db: dict) -> tuple[str, int]:
+    """Mood by priority: review > blocked > late > running > sleepy (night, nothing else) > idle."""
+    ts = db["tasks"]
+    review = sum(1 for t in ts if t["status"] == "review")
+    blocked = sum(1 for t in ts if t["status"] == "blocked")
+    late = sum(1 for t in ts if t["status"] == "open" and due_dt(t) < now())
+    running = sum(1 for t in ts if t["status"] == "running")
+    for mood, n in (("review", review), ("blocked", blocked), ("late", late), ("running", running)):
+        if n:
+            return mood, n
+    return ("sleepy" if now().hour >= 23 or now().hour < 6 else "idle"), 0
+
+
+def pet_say(db: dict) -> str:
+    pets, cfg = load_pets(), load_cfg()
+    if cfg.get("petEnabled") is False:
+        return ""
+    key = cfg.get("pet") if cfg.get("pet") in pets["styles"] else pets["default"]
+    st = pets["styles"][key]
+    mood, n = pet_state(db)
+    lines = st["lines"].get(mood) or st["lines"].get("idle") or [""]
+    line = lines[(now().timetuple().tm_yday + now().hour) % len(lines)]
+    name = cfg.get("petName") or st.get("name", "")
+    line = line.replace("{n}", str(n)).replace("{s}", "" if n == 1 else "s").replace("{name}", name)
+    return (st["faces"].get(mood, "") + " " + line).strip()
 
 
 SATISFIED = ("done", "review", "skipped")
@@ -209,6 +252,10 @@ def parse_fu(items: list[str]) -> list[dict]:
 
 
 def main() -> int:
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("list"); p.add_argument("--project"); p.add_argument("--all", action="store_true")
@@ -233,6 +280,7 @@ def main() -> int:
     p = sub.add_parser("force"); p.add_argument("id")
     p = sub.add_parser("ready"); p.add_argument("--json", action="store_true")
     sub.add_parser("reviews")
+    p = sub.add_parser("pet"); p.add_argument("action", nargs="?", default="list", choices=["list", "set", "say", "off", "on"]); p.add_argument("style", nargs="?"); p.add_argument("--name")
     p = sub.add_parser("replan"); p.add_argument("--from", dest="frm")
     p = sub.add_parser("note"); p.add_argument("id"); p.add_argument("text")
     a = ap.parse_args()
@@ -325,6 +373,29 @@ def main() -> int:
                 continue
             seen.add(ln); out.append(t)
         print(json.dumps(out, indent=2) if a.json else ("\n".join(fmt(t) for t in out) or "(none ready)"))
+    elif a.cmd == "pet":
+        pets, cfg = load_pets(), load_cfg()
+        cur = cfg.get("pet") if cfg.get("pet") in pets["styles"] else pets["default"]
+        if a.action == "say":
+            print(pet_say(db))
+        elif a.action in ("off", "on"):
+            cfg["petEnabled"] = a.action == "on"
+            CONFIG_FILE.write_text(json.dumps(cfg, indent=2, ensure_ascii=False), encoding="utf-8")
+            print("pet is " + ("on" if cfg["petEnabled"] else "off (no pet on the page or in /next; turn it back on with: cal.py pet on)"))
+        elif a.action == "set":
+            if a.style not in pets["styles"]:
+                sys.exit("unknown style; choose one of: " + ", ".join(pets["styles"]))
+            cfg["pet"] = a.style
+            if a.name:
+                cfg["petName"] = a.name
+            elif "petName" in cfg:
+                del cfg["petName"]
+            CONFIG_FILE.write_text(json.dumps(cfg, indent=2, ensure_ascii=False), encoding="utf-8")
+            print("pet set to " + a.style + ": " + pet_say(db))
+        else:
+            for k, v in pets["styles"].items():
+                print(("* " if k == cur else "  ") + f"{k:<8} {v['faces'].get('idle', ''):<10} {v['label']} - {v['blurb']}")
+            print("\nchoose with: cal.py pet set STYLE [--name NAME]    opt out with: cal.py pet off" + ("    [pet is currently OFF]" if cfg.get("petEnabled") is False else "") + "    (the page also has a Change pet picker)")
     elif a.cmd == "reviews":
         rv = [t for t in db["tasks"] if t["status"] == "review"]
         mine = [t for t in db["tasks"] if t["status"] == "open" and t.get("lane") == "owner" and due_dt(t) <= now() and deps_met(db, t)]

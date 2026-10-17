@@ -73,6 +73,7 @@ button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--acc
 .chatlink{align-self:flex-start;font-size:.85rem;color:var(--accent);margin-top:2px}.item.late .chatlink{color:var(--accent)}
 .runbtn{align-self:flex-start;margin-top:4px;border-color:var(--auto);color:var(--auto)}.runbtn:disabled{opacity:.6;cursor:default}
 .pet{display:flex;align-items:center;gap:12px;background:var(--auto-soft)}.petface{font-size:1.4rem;white-space:nowrap}.petmsg{font-size:.9rem}
+.pet{flex-wrap:wrap}.petsay{display:flex;flex-direction:column;flex:1;min-width:140px}.petname{font-size:.7rem;color:var(--muted);font-family:var(--mono)}.petchg{font-size:.75rem}.petface{background:none;border:0;padding:0;font-size:1.4rem;cursor:pointer}.petpick{display:flex;flex-wrap:wrap;gap:8px;width:100%;margin-top:6px}.petopt{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;min-width:128px}.petopt.on{border-color:var(--accent);background:var(--accent-soft)}.petopt .pf{font-size:1.1rem}.petopt .pl{font-weight:600}.petopt .pb{font-size:.7rem;color:var(--muted)}.petlabel{display:flex;align-items:center;gap:6px;font-size:.8rem}.petinput{font:inherit;border:1px solid var(--line);border-radius:6px;padding:3px 6px;background:var(--surface);color:var(--ink);width:10ch}
 .foot{color:var(--muted);font-size:.75rem}
 @media (max-width:560px){.full .layout{grid-template-columns:minmax(0,1fr)}.full .cell{min-height:56px}.full .ev{display:none}.full .dots{display:flex}}
 """
@@ -180,14 +181,43 @@ function render(){
   var fv=el('button',null,st.full?'Compact view':'Full view');fv.setAttribute('aria-pressed',String(st.full));
   fv.onclick=function(){st.full=!st.full;try{localStorage.setItem('cc-view',JSON.stringify({full:st.full}))}catch(e){}render()};
   tools.appendChild(tb);tools.appendChild(fv);top.appendChild(tools);app.appendChild(top);
-  var rev=tasks.filter(function(t){return t.status==='review'}).length,run=tasks.filter(function(t){return t.status==='running'}).length,blk=tasks.filter(function(t){return t.status==='blocked'}).length;
-  var face,msg;
-  if(rev){face='(⌒▽⌒)♡';msg=rev+' thing'+(rev>1?'s':'')+' ready for your review, master! Please look~'}
-  else if(blk){face='(´;ω;`)';msg=blk+' task'+(blk>1?'s are':' is')+' blocked and needs you...'}
-  else if(late){face='(>_<)';msg=late+' overdue... ganbatte!'}
-  else if(run){face='(๑•̀ㅂ•́)و✧';msg=run+' running right now. I am cheering for them!'}
-  else{face='(=^･ω･^=)';msg='All quiet. Waiting for you, master~'}
-  var pet=el('div','card pet');pet.appendChild(el('span','petface',face));pet.appendChild(el('span','petmsg',msg));app.appendChild(pet);
+  var P=D.pets&&D.pets.styles?D.pets:null;
+  var petOn=(function(){var v='';try{v=localStorage.getItem('cc-pet-on')||''}catch(e){}return v==='1'?true:v==='0'?false:!(D.pet&&D.pet.enabled===false)})();
+  if(P&&!petOn){var sp=el('button','petchg','Show pet');sp.type='button';sp.onclick=function(){try{localStorage.setItem('cc-pet-on','1')}catch(e){}render()};tools.appendChild(sp)}
+  if(P&&petOn){
+    var ls=function(k){try{return localStorage.getItem(k)||''}catch(e){return ''}},ss=function(k,v){try{localStorage.setItem(k,v)}catch(e){}};
+    var sty=ls('cc-pet'),cp=D.pet||{};
+    if(!P.styles[sty])sty=(cp.style&&P.styles[cp.style])?cp.style:P.default;
+    var ps=P.styles[sty],pname=ls('cc-petname-'+sty)||cp.name||ps.name;
+    var cnt=function(f){return tasks.filter(f).length};
+    var rev=cnt(function(t){return t.status==='review'}),blk=cnt(function(t){return t.status==='blocked'}),run=cnt(function(t){return t.status==='running'});
+    var mood,n;
+    if(rev){mood='review';n=rev}else if(blk){mood='blocked';n=blk}else if(late){mood='late';n=late}else if(run){mood='running';n=run}
+    else{mood=(new Date().getHours()>=23||new Date().getHours()<6)?'sleepy':'idle';n=0}
+    var lines=ps.lines[mood]||ps.lines.idle||[''],line=lines[(st.petI||0)%lines.length];
+    line=line.replace('{n}',n).replace('{s}',n===1?'':'s').replace('{name}',pname);
+    var pet=el('div','card pet'),face=el('button','petface',ps.faces[mood]||'');
+    face.type='button';face.title='Click for another line';face.setAttribute('aria-label',pname+': '+line);
+    face.onclick=function(){st.petI=(st.petI||0)+1;render()};
+    if(!ps.faces[mood])face.style.display='none';
+    var say=el('div','petsay');say.appendChild(el('span','petname',pname));say.appendChild(el('span','petmsg',line));
+    var chg=el('button','petchg',st.petOpen?'Done':'Change pet');chg.type='button';
+    chg.onclick=function(){st.petOpen=!st.petOpen;render()};
+    pet.appendChild(face);pet.appendChild(say);pet.appendChild(chg);
+    if(st.petOpen){
+      var pick=el('div','petpick');
+      Object.keys(P.styles).forEach(function(k){var v=P.styles[k],b=el('button','petopt'+(k===sty?' on':''));b.type='button';
+        b.appendChild(el('span','pf',v.faces.idle||'Aa'));b.appendChild(el('span','pl',v.label));b.appendChild(el('span','pb',v.blurb));
+        b.onclick=function(){ss('cc-pet',k);render()};pick.appendChild(b)});
+      var nm=el('input','petinput');nm.value=pname;nm.maxLength=20;nm.setAttribute('aria-label','Pet name');
+      nm.onchange=function(){ss('cc-petname-'+sty,nm.value.trim());render()};
+      var nl=el('label','petlabel','Name ');nl.appendChild(nm);pick.appendChild(nl);
+      var off=el('button','petchg','Turn pet off');off.type='button';off.onclick=function(){ss('cc-pet-on','0');st.petOpen=false;render()};
+      pick.appendChild(off);
+      pet.appendChild(pick);
+    }
+    app.appendChild(pet);
+  }
   var lay=el('div','layout'),a=el('div','months'),b=el('div','months');
   if(st.full){
     var last=live.length?live[live.length-1].d:now,y=now.getFullYear(),m=now.getMonth(),n=0;
@@ -227,7 +257,16 @@ def main() -> int:
             disp = json.loads(dj.read_text(encoding="utf-8"))
         except ValueError:
             disp = {}
-    data = json.dumps({"generated": now.isoformat(), "tasks": tasks, "dispatcher": disp}, ensure_ascii=False).replace("</", "<\\/")
+    pets, pcfg = {}, {}
+    try:
+        pets = json.loads((HERE / "pets.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        pass
+    try:
+        pcfg = json.loads((HERE / "config.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        pass
+    data = json.dumps({"generated": now.isoformat(), "tasks": tasks, "dispatcher": disp, "pets": pets, "pet": {"style": pcfg.get("pet"), "name": pcfg.get("petName"), "enabled": pcfg.get("petEnabled", True) is not False}}, ensure_ascii=False).replace("</", "<\\/")
     page = "\n".join([
         "<title>Claude Calendar</title>", '<meta name="claude:viewport-fit-sides" content="cover">',
         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">',
