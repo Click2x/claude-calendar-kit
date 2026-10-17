@@ -102,6 +102,7 @@ flowchart LR
 | [`INSTALL.md`](INSTALL.md) | Step-by-step install guide written for Claude to follow from the repo link alone. |
 | [`install.py`](install.py) | The installer: copies files, installs `/next`, seeds tasks, renders the first page. `--dry-run` shows what it would do. |
 | [`pets.json`](pets.json), [`skills/pet/`](skills/pet/SKILL.md) | An **optional** pet in six styles (waifu, kitten, robot, blob, emoji, plain). It reacts to your tasks on the page and opens `/next`. Pick a style on the page, with `/pet`, or `cal.py pet set STYLE`. Opt out any time with `cal.py pet off` or `install.py --no-pet`. |
+| [`republish-hook.py`](republish-hook.py) | An optional Claude Code hook: after any command that changes the calendar, it reminds Claude to republish your page, so the page is never stale. The welcome offers to add it (with your OK). |
 | [`docs-chat-links.md`](docs-chat-links.md) | The "every waiting item gets a one-click chat link" rule, and how `cal.py attach` and the CLI output support it. |
 | [`SETUP_PROMPT.md`](SETUP_PROMPT.md) | The one-line paste-in prompt, if you prefer it to copying from the README. |
 | [`examples/tasks.example.json`](examples/tasks.example.json) | A starting `tasks.json`. |

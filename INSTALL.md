@@ -44,6 +44,11 @@ Yes: `python cal.py pet set STYLE [--name NAME]`, then show `cal.py pet say`. Th
 > 2. No, I'll use /calendar
 
 Yes: publishing the page is part of pinning it, so say plainly that it will be published as a **private** artifact (only they can open it), then publish `~/.claude/calendar/calendar.html`, save the URL with `python cal.py config set artifactUrl <url>`, and pin it. No: do nothing, and `/calendar` will offer it later.
+- **After a yes, keep the page current automatically.** Say: "I can republish the calendar every time it changes, so the page is never stale. That needs a small hook added to your Claude settings. OK? 1. Yes 2. No". Only on a yes, add this to `~/.claude/settings.json` (merge into any existing `hooks`, never overwrite it), and tell them what you added:
+  ```json
+  "hooks": {"PostToolUse": [{"matcher": "Bash|PowerShell", "hooks": [{"type": "command", "command": "python ~/.claude/calendar/republish-hook.py"}]}]}
+  ```
+  The hook (`republish-hook.py`, installed next to the calendar) only prints a reminder for Claude to republish after a command that changes the calendar, and only when `artifactUrl` is set. It changes nothing itself. If they say no, tell them to ask for a republish after changes, or run `/calendar`.
 
 **B4. Can I send you links to your chats that need attention?**
 
