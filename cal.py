@@ -90,11 +90,12 @@ def parse_when(s: str) -> str:
     return d.replace(microsecond=0).isoformat()
 
 
-GRACE = timedelta(minutes=15)  # a task is only "overdue" once it is this far past its time, so a task made a moment ago never is
+GRACE = timedelta(minutes=15)  # automatic tasks get this long before they count as overdue (the dispatcher picks them up)
 
 
 def is_overdue(t: dict) -> bool:
-    return t["status"] == "open" and due_dt(t) < now() - GRACE
+    """Waiting on the user = overdue the moment it is due. Automatic tasks get a short grace period."""
+    return t["status"] == "open" and due_dt(t) < now() - (GRACE if t.get("auto") else timedelta(0))
 
 
 def due_dt(t: dict) -> datetime:
@@ -285,7 +286,7 @@ def sort_plan(db: dict) -> list[tuple[dict, float, list[str]]]:
         if t["status"] not in ("open", "blocked") or t.get("fixed") or (t.get("lane") or "") == "fixed":
             continue
         score, why = 0.0, []
-        late_days = (now() - GRACE - due_dt(t)).total_seconds() / 86400
+        late_days = (now() - (GRACE if t.get("auto") else timedelta(0)) - due_dt(t)).total_seconds() / 86400
         if late_days > 0:
             score += min(10.0, 3.0 + late_days * 2)
             why.append("overdue")

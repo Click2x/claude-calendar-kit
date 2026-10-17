@@ -99,7 +99,7 @@ try{if(window.claude&&claude.use)claude.use('db').then(function(db){if(!db)retur
   db.collection('runRequests').onSnapshot(function(sn){reqs={};sn.docs.forEach(function(d){if(d.exists)reqs[d.id]=d.data()});render()},function(){});render()}).catch(function(){})}catch(e){}
 function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
 function kind(t){return t.auto?'auto':(t.sched?'scheduled':'manual')}
-function isLate(t){return t.status==='open'&&t.d<now-15*60000}
+function isLate(t){return t.status==='open'&&t.d<now-(t.auto?15*60000:0)}
 function dotClass(t){return t.status==='done'?'done':isLate(t)?'late':t.auto?'auto':''}
 function monthGrid(y,m,compact){
   var card=el('div','card'),head=el('div','head');
