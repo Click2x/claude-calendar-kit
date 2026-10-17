@@ -5,7 +5,7 @@ description: Show what is open on the shared Claude Calendar (what is waiting fo
 
 The user typed /next. Give them the open items from their shared Claude Calendar, with a way to jump to each chat, and then check what they actually want.
 
-1. Gather, with the calendar CLI (default folder ~/.claude/calendar, here C:\Users\lilbr\.claude\calendar):
+1. Gather, with the calendar CLI (default folder ~/.claude/calendar):
    - `python cal.py replan` first, so the due times are current.
    - `python cal.py reviews` for work waiting on the user and the user's own tasks that are ready now.
    - `python cal.py list` for what is running and what is coming next.
