@@ -14,6 +14,18 @@ Lanes, dependencies, a review queue, automatic follow-ups, and a `/next` command
 
 ---
 
+## ⚡ Set it up by pasting one line
+
+Give your Claude this link and it builds the rest on its own:
+
+```text
+Set up https://github.com/Click2x/claude-calendar-kit for me. Read INSTALL.md and follow it.
+```
+
+It clones the repo, runs the installer, asks you a couple of questions about your projects, registers the dispatcher, and tells you to open a new chat and type `/next`. It asks before connecting any account or publishing anything.
+
+---
+
 ## Why
 
 When Claude can run work for you in the background, the bottleneck becomes **you**: what is waiting on your review, what is stuck, what should start next, and what you forgot. This kit gives every project one shared calendar that both you and Claude can read and write, and keeps work moving without losing time.
@@ -58,20 +70,20 @@ flowchart LR
 | [`templates/calendar-runner.SKILL.md`](templates/calendar-runner.SKILL.md) | The dispatcher. Run it as a scheduled task every 30 minutes. |
 | [`skills/next/SKILL.md`](skills/next/SKILL.md) | The `/next` skill. Copy it to `~/.claude/skills/next/`. |
 | [`docs-project-prioritization.md`](docs-project-prioritization.md) | A companion project that triages received messages, cleans up the calendar, nudges you about neglected projects and suggests new ones. |
-| [`SETUP_PROMPT.md`](SETUP_PROMPT.md) | A prompt that sets all of this up for you. |
+| [`INSTALL.md`](INSTALL.md) | Step-by-step install guide written for Claude to follow from the repo link alone. |
+| [`install.py`](install.py) | The installer: copies files, installs `/next`, seeds tasks, renders the first page. `--dry-run` shows what it would do. |
+| [`SETUP_PROMPT.md`](SETUP_PROMPT.md) | A longer paste-in prompt, if you prefer that to the link. |
 | [`examples/tasks.example.json`](examples/tasks.example.json) | A starting `tasks.json`. |
 
 ## Quick start
 
-The easy way: paste [`SETUP_PROMPT.md`](SETUP_PROMPT.md) into a new Claude Code chat.
+The easy way: paste the one-liner above. Claude follows [`INSTALL.md`](INSTALL.md). The installer, [`install.py`](install.py), does the file copying and is safe to re-run.
 
 By hand:
 
 ```bash
-mkdir -p ~/.claude/calendar ~/.claude/skills/next
-cp cal.py render_html.py ~/.claude/calendar/
-cp examples/tasks.example.json ~/.claude/calendar/tasks.json     # then edit it
-cp skills/next/SKILL.md ~/.claude/skills/next/SKILL.md
+python install.py --dry-run      # see what it will do
+python install.py                # copy files, install /next, seed tasks.json, render the page
 
 cd ~/.claude/calendar
 python cal.py list

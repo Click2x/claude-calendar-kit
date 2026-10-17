@@ -1,5 +1,7 @@
 # Setup prompt
 
+The short version: tell your Claude `Set up https://github.com/Click2x/claude-calendar-kit for me. Read INSTALL.md and follow it.` The prompt below is the longer, self-contained alternative.
+
 Paste this into a new Claude Code session on your machine. It sets up the calendar and the prioritization project from this repo.
 
 ```text
