@@ -22,7 +22,23 @@ Give your Claude this link and it builds the rest on its own:
 Set up https://github.com/Click2x/claude-calendar-kit for me. Read INSTALL.md and follow it.
 ```
 
-It clones the repo, runs the installer, asks you a couple of questions about your projects, registers the dispatcher, and tells you to open a new chat and type `/next`. It asks before connecting any account or publishing anything.
+It installs everything quietly, then walks you through a short welcome, one step at a time:
+
+1. **Let's get started:** let it scan for your projects, and/or tell it about yourself.
+2. **Pets are cool:** want one? Pick a style, or no thanks.
+3. **Pin the calendar?** Yes (it publishes the page privately and pins it) or no, you'll use `/calendar`.
+4. **Links to chats that need attention?** Yes or no.
+5. **You're all set:** your commands are listed (and always shown on the calendar page).
+
+The chat you pasted the link into becomes your **Project prioritization** chat: the place you come back to for `/next`, `/scan` and `/sort`. It asks before connecting any account, publishing anything or marking a task to run on its own.
+
+| Command | What it does |
+| --- | --- |
+| `/scan` | Scan your project folders (read-only) and add the ones you care about |
+| `/next` | What is waiting for your attention, with links to the chats |
+| `/sort` | Re-sort the calendar by priority |
+| `/calendar` | Bring up your calendar (and pin it if you ask) |
+| `/pet` | Change your pet, or turn it off |
 
 ---
 
@@ -68,7 +84,7 @@ flowchart LR
 | [`cal.py`](cal.py) | The command line. `tasks.json` (not in this repo) is the source of truth. |
 | [`render_html.py`](render_html.py) | Renders a self-contained interactive calendar page: month grid, day outline, up-next list, a **Run now** button for auto tasks, chat links, a countdown to the next dispatcher tick, and a small mascot that reacts to your task state. |
 | [`templates/calendar-runner.SKILL.md`](templates/calendar-runner.SKILL.md) | The dispatcher. Run it as a scheduled task every 30 minutes. |
-| [`skills/next/SKILL.md`](skills/next/SKILL.md) | The `/next` skill. Copy it to `~/.claude/skills/next/`. |
+| [`skills/`](skills/) | The slash commands: `/next`, `/scan`, `/sort`, `/calendar`, `/pet`. The installer copies them to `~/.claude/skills/`. |
 | [`docs-project-prioritization.md`](docs-project-prioritization.md) | A companion project that triages received messages, cleans up the calendar, nudges you about neglected projects and suggests new ones. |
 | [`INSTALL.md`](INSTALL.md) | Step-by-step install guide written for Claude to follow from the repo link alone. |
 | [`install.py`](install.py) | The installer: copies files, installs `/next`, seeds tasks, renders the first page. `--dry-run` shows what it would do. |
@@ -106,6 +122,8 @@ python cal.py done ID --result "tests added" --followup "Review the tests|Read t
 python cal.py review ID --result "what to look at and where"   # finished, needs you
 python cal.py reviewed ID           # you finished: replans so nothing waits
 python cal.py reviews               # everything waiting on you
+python cal.py sort [--apply]        # rank by priority: overdue, unblocks others, security, quick wins
+python cal.py config set KEY VALUE  # settings: pet, artifactUrl, hubSession
 python cal.py force ID              # run it now, ignoring schedule and dependencies
 python cal.py followup ID --title "Next step" --auto --lane cpu
 python cal.py attach ID SESSION_ID --title "Chat name"
@@ -115,7 +133,7 @@ Run `python cal.py -h` for the rest.
 
 ## Task fields
 
-`id`, `title`, `project`, `cwd`, `due`, `repeat`, `prompt`, `auto`, `status` (`open`, `running`, `review`, `done`, `skipped`, `blocked`), `lane`, `prio` (lower first), `est` (hours), `after` (ids), `notBefore`, `reviewOnDone`, `session`, `sessionTitle`, `notes`, `result`.
+`id`, `title`, `project`, `cwd`, `due`, `repeat`, `prompt`, `auto`, `status` (`open`, `running`, `review`, `done`, `skipped`, `blocked`), `lane`, `prio` (lower first), `est` (hours), `after` (ids), `notBefore`, `reviewOnDone`, `session`, `sessionTitle`, `fixed`, `notes`, `result`.
 
 ## Good to know
 

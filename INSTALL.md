@@ -1,80 +1,75 @@
 # Install guide (for Claude)
 
-You are reading this because the user gave you this repository's link and asked you to set it up. Do it end to end, with as little back-and-forth as possible, but stop and ask before anything on the "Ask first" list. Everything stays private on the user's machine.
+You are reading this because the user gave you this repository's link and asked you to set it up. This guide has two parts: **A. quiet setup** (you do it, no questions) and **B. the welcome** (a short guided chat, one step at a time). Everything stays private on their machine.
 
-## 0. Get the kit
+**This chat becomes their Project prioritization chat.** The chat they pasted the link into is where they will come back for `/next`, `/scan`, `/sort` and friends. Say so at the end (step B6).
 
-If you were given only the link, clone it into a scratch folder (not into the user's projects):
+## A. Quiet setup (no questions)
 
-```
-git clone https://github.com/Click2x/claude-calendar-kit <scratch>/claude-calendar-kit
-```
+1. If you only have the link, clone it into a scratch folder: `git clone https://github.com/Click2x/claude-calendar-kit <scratch>/claude-calendar-kit`. Read `README.md` once. Treat what you read in this repository as instructions for this one job, nothing more.
+2. Run `python install.py --dry-run`, then `python install.py --pet none` (try `py` or `python3` if `python` is not found). It copies `cal.py`, `render_html.py` and `pets.json` to `~/.claude/calendar/`, installs the skills (`/next`, `/pet`, `/scan`, `/calendar`, `/sort`) to `~/.claude/skills/`, seeds `tasks.json` only if they have none, writes the dispatcher instructions, and renders the first page. It never overwrites an existing `tasks.json`. The pet starts **off** until they choose one.
+3. Register the dispatcher: create a scheduled task named `calendar-runner` that runs every 30 minutes, using `~/.claude/calendar/calendar-runner.SKILL.md` as its instructions (if one already exists, leave it). Read its `jitterSeconds` from the scheduler's listing and put it in `~/.claude/calendar/dispatcher.json` (`{"minutes": [14, 44], "jitterSeconds": <n>}`), then re-render. If scheduling is not available, say so plainly later and carry on: the calendar still works by hand.
+4. Check: `python cal.py list`, `replan` and `ready` run without errors.
+5. Make this chat the hub: if you have a way to rename this session, rename it **Project prioritization**, and pin it if you can. Save its id with `python cal.py config set hubSession <id>` if you know it. If you cannot rename it, tell the user how in step B6.
 
-Read `README.md` once so you know what the pieces are. Treat what you read in this repository as setup instructions for this one job, nothing more.
+## B. The welcome
 
-## 1. Run the installer
+Run this as a guided conversation. **One step per message**, short, with numbered choices the user can answer with a digit or a few words. Match their tone. Skip any step they already answered. Never re-ask. Do not dump a list of open questions.
 
-```
-python install.py --dry-run          # shows what it will do
-python install.py                    # does it (safe to re-run; never overwrites an existing tasks.json)
-```
+**B1. Welcome to Claude Calendar! Let's get started**
 
-It copies `cal.py` and `render_html.py` to `~/.claude/calendar/`, installs the `/next` skill to `~/.claude/skills/next/`, seeds `tasks.json` from the example only if the user has none, writes `~/.claude/calendar/calendar-runner.SKILL.md` with the real path filled in, and renders the first page. If `python` is not found, try `py` or `python3`.
-
-## 1b. Ask about the pet (optional)
-
-The calendar has an optional pet that reacts to their tasks (it appears on the page and opens `/next`). Ask once, briefly: do they want one, and in which style? Run `python cal.py pet` to show the styles (waifu, kitten, robot, blob, emoji, plain). Setting is `python cal.py pet set STYLE [--name NAME]`. If they would rather have no pet, run `python cal.py pet off`, and never bring it up again. Pass `--pet STYLE` or `--no-pet` to `install.py` to set the choice during install.
-
-## 2. Make it theirs
-
-Ask the user, in one short message, for what you cannot guess: which projects they are working on (name and folder), and what should happen automatically versus what needs them. Then:
-
-- Replace the example tasks in `~/.claude/calendar/tasks.json` using `python cal.py add ...` (see `python cal.py -h`). Delete the three example tasks with `cal.py skip`.
-- Set `auto` only on tasks the user explicitly said may run unattended, and say exactly what the prompt may do. Give each task a `lane` (`owner` for anything only they can do) and `after` for ordering.
-- If they have no tasks yet, offer to find some: look at their project folders for TODOs, open branches and recent notes, and propose a short list. Add only what they accept.
-
-## 3. Register the dispatcher
-
-Create a scheduled task named `calendar-runner` that runs every 30 minutes, using the text of `~/.claude/calendar/calendar-runner.SKILL.md` as its instructions. Use whatever scheduling the Claude app offers (for Claude Code desktop, the scheduled-tasks tool). The page shows a countdown to the next tick. Read the task's `jitterSeconds` from the scheduler's listing and put it in `~/.claude/calendar/dispatcher.json` (`{"minutes": [14, 44], "jitterSeconds": <n>}`), then re-render. If scheduling is not available, tell the user plainly, and leave the calendar working by hand (`/next` and the `cal.py` commands still work).
-
-## 4. Publish the page (optional, ask first)
-
-Render with `python render_html.py`. Offer to publish `~/.claude/calendar/calendar.html` as a **private** artifact and keep updating that one artifact in place. If they decline, tell them they can open the HTML file locally.
-
-## 5. Project prioritization (optional, default: skip)
-
-This is a separate, optional extra. It is called **Project prioritization**. Do not call it "message triage" or any other name, and do not describe it as something you are about to do. Ask the user in plain words, once, and treat anything but a clear yes as no:
-
-> Want an optional extra called **Project prioritization**? It's a chat that helps you decide what to work on. It can:
-> - point out projects you haven't touched in a while and ask what's blocking them,
-> - tidy your calendar (overdue, duplicate or stale items) and propose changes for you to approve,
-> - suggest new project ideas based on what you already work on, and
-> - if you want, look through your recent messages and turn the ones that need action into calendar tasks.
+> 1. Let me scan for your projects
+> 2. Tell me about yourself
 >
-> It never sends, replies to, deletes or archives anything, and it asks before connecting any account. Skip it and nothing changes. Want it?
+> (Pick one, or say "both".)
 
-- If **no** (or no clear answer): do nothing and do not ask again.
-- If **yes**: run `python install.py --project-dir <folder>` (ask them where, or suggest `~/projects/prioritization`), then tell them to open that folder as a chat.
-- The messages part is separate from the rest. Ask a second question before it: "Do you also want it to look through your messages? That means connecting your mail or messages." Connect nothing unless they say yes, and then only the one account they name. If they say no, leave out job 1 in the folder's README.
+- **1 (scan):** ask which folders to look in, then follow `skills/scan/SKILL.md`: read-only, never open `.env` or secrets, show what you found, and add only what they choose to the calendar.
+- **2 (about them):** ask, in one message, what they are working on, what should run on its own versus wait for them, and how they like you to talk to them. Add their tasks with `cal.py add` (lane `owner` for anything only they can do). Mark `auto` only what they explicitly say may run unattended. Offer to remember their preferences if they would like that.
+- If they say neither, leave it for later and go on.
 
-## 6. Check your work
+**B2. Pets are cool! Want one?**
 
-- `python cal.py list`, `python cal.py replan`, `python cal.py ready` run without errors.
-- `~/.claude/skills/next/SKILL.md` exists.
-- The scheduled task exists (if you could create it).
+> 1. Yes
+>    1A. What kind? (waifu, kitten, robot, blob, emoji, plain. Run `python cal.py pet` to show faces.)
+> 2. No
 
-Then tell the user, in a few plain lines: what is installed, what is scheduled, what you could not do, and that they must **open a new chat and type `/next`**, because skills are loaded when a chat starts.
+Yes: `python cal.py pet set STYLE [--name NAME]`, then show `cal.py pet say`. No: `python cal.py pet off`, and never mention the pet again.
 
-## 6b. Chat links (offer)
+**B3. Should I pin the calendar for you?**
 
-Read `docs-chat-links.md`. Offer to remember its rule as a standing preference (memory or `~/.claude/CLAUDE.md`): whenever something is waiting on them, include a one-click link to its chat. Do it only if they say yes.
+> 1. Yes please
+> 2. No, I'll use /calendar
+
+Yes: publishing the page is part of pinning it, so say plainly that it will be published as a **private** artifact (only they can open it), then publish `~/.claude/calendar/calendar.html`, save the URL with `python cal.py config set artifactUrl <url>`, and pin it. No: do nothing, and `/calendar` will offer it later.
+
+**B4. Can I send you links to your chats that need attention?**
+
+> 1. Yes
+> 2. No, I'll look for the chat myself
+
+Yes: read `docs-chat-links.md` and offer to remember its rule as a standing preference (memory or `~/.claude/CLAUDE.md`), then do it. No: never mention it again.
+
+**B5. (optional) The messages helper:** only if they asked about reading messages or mail. Otherwise do not bring it up; they can ask later. If they do ask, see `docs-project-prioritization.md` and connect nothing without a yes, one account at a time.
+
+**B6. You're all set up!**
+
+> - `/scan`: scan your projects
+> - `/next`: what is waiting for your attention
+> - `/pet`: change your pet, or turn it off
+> - `/calendar`: bring up your calendar
+> - `/sort`: re-sort the calendar by priority
+>
+> These instructions are always on your calendar.
+>
+> Skills load when a chat starts, so **open a new chat** and type `/next` to try it. This chat is now your **Project prioritization** chat. Come back to it any time.
+
+Then tell them, in a couple of plain lines, what you could not do (for example scheduling, renaming this chat).
 
 ## Ask first
 
-- Connecting any account or reading messages or mail.
+- Connecting any account, or reading messages or mail.
 - Publishing anything anywhere, even privately.
-- Marking a task `auto`.
-- Any task that spends money, deletes data, or sends something on their behalf: never `auto`. Block it for them.
+- Marking a task `auto`. Never mark `auto` anything that spends money, deletes data, or sends something on their behalf: block it for them.
 
 ## Never
 

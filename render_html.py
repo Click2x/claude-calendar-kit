@@ -74,6 +74,7 @@ button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--acc
 .runbtn{align-self:flex-start;margin-top:4px;border-color:var(--auto);color:var(--auto)}.runbtn:disabled{opacity:.6;cursor:default}
 .pet{display:flex;align-items:center;gap:12px;background:var(--auto-soft)}.petface{font-size:1.4rem;white-space:nowrap}.petmsg{font-size:.9rem}
 .pet{flex-wrap:wrap}.petsay{display:flex;flex-direction:column;flex:1;min-width:140px}.petname{font-size:.7rem;color:var(--muted);font-family:var(--mono)}.petchg{font-size:.75rem}.petface{background:none;border:0;padding:0;font-size:1.4rem;cursor:pointer}.petpick{display:flex;flex-wrap:wrap;gap:8px;width:100%;margin-top:6px}.petopt{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;min-width:128px}.petopt.on{border-color:var(--accent);background:var(--accent-soft)}.petopt .pf{font-size:1.1rem}.petopt .pl{font-weight:600}.petopt .pb{font-size:.7rem;color:var(--muted)}.petlabel{display:flex;align-items:center;gap:6px;font-size:.8rem}.petinput{font:inherit;border:1px solid var(--line);border-radius:6px;padding:3px 6px;background:var(--surface);color:var(--ink);width:10ch}
+.cmdrow{display:grid;grid-template-columns:92px 1fr;gap:8px;padding:3px 0;font-size:.85rem}.cmdname{font-family:var(--mono);color:var(--accent)}.cmddesc{color:var(--ink)}
 .foot{color:var(--muted);font-size:.75rem}
 @media (max-width:560px){.full .layout{grid-template-columns:minmax(0,1fr)}.full .cell{min-height:56px}.full .ev{display:none}.full .dots{display:flex}}
 """
@@ -228,6 +229,11 @@ function render(){
     a.appendChild(monthGrid(st.y,st.m,true));a.appendChild(outline());a.appendChild(upNext());lay.appendChild(a);
   }
   app.appendChild(lay);
+  var cmds=[['/next','What is waiting for your attention, with links to the chats'],['/scan','Scan your project folders and add the ones you care about'],['/sort','Re-sort the calendar by priority'],['/calendar','Bring up this calendar'],['/pet','Change your pet, or turn it off']];
+  var ch=el('div','card cmds');ch.appendChild(el('div','head')).appendChild(el('h2',null,'Commands'));
+  cmds.forEach(function(c){var row=el('div','cmdrow');row.appendChild(el('code','cmdname',c[0]));row.appendChild(el('span','cmddesc',c[1]));ch.appendChild(row)});
+  ch.appendChild(el('p','empty','These are always here. Type them in any chat.'));
+  app.appendChild(ch);
   app.appendChild(el('p','foot','Click a date for its outline. Auto tasks are dispatched by the calendar runner every 30 minutes (:14 and :44) while the Claude app is open; each lane runs one task at a time.'));
 }
 render();

@@ -3,8 +3,8 @@
 
   python install.py [--home DIR] [--project-dir DIR] [--dry-run]
 
-Does the deterministic part: copies cal.py and render_html.py to <home>/.claude/calendar, installs the /next skill to
-<home>/.claude/skills/next, seeds tasks.json from examples/ ONLY if you have none, writes the dispatcher instructions with the
+Does the deterministic part: copies cal.py and render_html.py to <home>/.claude/calendar, installs every skill in skills/ (/next, /pet,
+/scan, /calendar, /sort) to <home>/.claude/skills/, seeds tasks.json from examples/ ONLY if you have none, writes the dispatcher instructions with the
 real path filled in, and renders the first page. Optionally creates the prioritization project folder.
 Registering the scheduled dispatcher and publishing the page need the Claude app, so INSTALL.md has Claude do those.
 """
@@ -24,14 +24,12 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--home", default=str(Path.home()), help="home directory to install under (default: your home)")
     ap.add_argument("--project-dir", help="also create the Project prioritization folder here")
-    ap.add_argument("--pet", default="waifu", help="pet style to start with, or 'none' to opt out (see pets.json; change any time with cal.py pet)")
+    ap.add_argument("--pet", default="none", help="pet style to start with (waifu, kitten, robot, blob, emoji, plain), or 'none' for no pet (see pets.json; change any time with cal.py pet)")
     ap.add_argument("--no-pet", action="store_true", help="same as --pet none")
     ap.add_argument("--dry-run", action="store_true", help="show what would happen and change nothing")
     a = ap.parse_args()
     home = Path(a.home).expanduser()
     cal = home / ".claude" / "calendar"
-    skill = home / ".claude" / "skills" / "next"
-    pet_skill = home / ".claude" / "skills" / "pet"
     log = []
 
     def do(msg: str, fn=None) -> None:
@@ -42,9 +40,10 @@ def main() -> int:
     do(f"create {cal}", lambda: cal.mkdir(parents=True, exist_ok=True))
     for f in ("cal.py", "render_html.py"):
         do(f"copy {f} -> {cal / f}", lambda f=f: shutil.copy2(HERE / f, cal / f))
-    do(f"install /next skill -> {skill / 'SKILL.md'}", lambda: (skill.mkdir(parents=True, exist_ok=True), shutil.copy2(HERE / "skills" / "next" / "SKILL.md", skill / "SKILL.md")))
+    skills_dir = home / ".claude" / "skills"
+    for sk in sorted(p for p in (HERE / "skills").iterdir() if (p / "SKILL.md").exists()):
+        do(f"install /{sk.name} skill -> {skills_dir / sk.name / 'SKILL.md'}", lambda sk=sk: ((skills_dir / sk.name).mkdir(parents=True, exist_ok=True), shutil.copy2(sk / "SKILL.md", skills_dir / sk.name / "SKILL.md")))
     do(f"copy pets.json -> {cal / 'pets.json'}", lambda: shutil.copy2(HERE / "pets.json", cal / "pets.json"))
-    do(f"install /pet skill -> {pet_skill / 'SKILL.md'}", lambda: (pet_skill.mkdir(parents=True, exist_ok=True), shutil.copy2(HERE / "skills" / "pet" / "SKILL.md", pet_skill / "SKILL.md")))
     if not (cal / "config.json").exists():
         off = a.no_pet or a.pet.lower() in ("none", "off")
         cfg = json.dumps({"petEnabled": False} if off else {"pet": a.pet, "petEnabled": True}) + chr(10)

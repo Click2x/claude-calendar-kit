@@ -18,6 +18,8 @@ Claude Calendar - one shared task calendar for ALL of the owner's projects. Plai
   python cal.py review ID --result TEXT                 auto work finished but needs the owner: status review (does not block dependents)
   python cal.py reviewed ID [--result TEXT]             owner finished reviewing / doing it: done, then replan (pulls dependents forward)
   python cal.py pet [list|say|on|off|set STYLE [--name NAME]]   your calendar pet: pick a style, rename it, or hear what it has to say
+  python cal.py sort [--apply]                          re-sort by priority (overdue, unblocks others, waiting on you, quick wins); preview unless --apply
+  python cal.py config [get|set KEY VALUE]              settings in config.json (pet, artifactUrl, hubSession...)
   python cal.py reviews                                 everything waiting on the owner (review + due owner tasks)
   python cal.py force ID                                run this task NOW: ignore its due time, dependencies and notBefore (set by the page's Run now button)
   python cal.py replan [--from WHEN]                    recompute due times: every task starts as soon as its deps and lane are free
@@ -244,6 +246,44 @@ def spawn_followups(db: dict, parent: dict, extra: list[dict]) -> list[dict]:
     return made
 
 
+def sort_plan(db: dict) -> list[tuple[dict, float, list[str]]]:
+    """Score open tasks by priority. Higher score = sooner. Returns [(task, score, reasons)] best first.
+    Reasons: overdue, waiting on you (review), unblocks other tasks, quick win. Fixed-time tasks are left alone."""
+    open_ids = {t["id"] for t in db["tasks"] if t["status"] in ("open", "blocked", "review", "running")}
+    blocks: dict[str, int] = {}
+    for t in db["tasks"]:
+        if t["status"] in ("open", "blocked"):
+            for d in t.get("after") or []:
+                blocks[d] = blocks.get(d, 0) + 1
+    out = []
+    for t in db["tasks"]:
+        if t["status"] not in ("open", "blocked") or t.get("fixed") or (t.get("lane") or "") == "fixed":
+            continue
+        score, why = 0.0, []
+        late_days = (now() - due_dt(t)).total_seconds() / 86400
+        if late_days > 0:
+            score += min(10.0, 3.0 + late_days * 2)
+            why.append("overdue")
+        n = blocks.get(t["id"], 0)
+        if n:
+            score += 4.0 * n
+            why.append(f"unblocks {n} task{'s' if n != 1 else ''}")
+        if (t.get("lane") or "") == "owner":
+            score += 1.0
+        if est_h(t) <= 0.5:
+            score += 1.5
+            why.append("quick win")
+        if any(w in t["title"].lower() for w in ("revoke", "rotate", "security", "credential", "exposed", "leak")):
+            score += 4.0
+            why.append("security")
+        if t.get("status") == "blocked":
+            score -= 5.0
+            why.append("blocked")
+        out.append((t, score, why))
+    out.sort(key=lambda x: (-x[1], due_dt(x[0])))
+    return out
+
+
 def lane_busy(db: dict, lane: str) -> bool:
     return any(t["status"] == "running" and t.get("lane") == lane for t in db["tasks"])
 
@@ -292,6 +332,8 @@ def main() -> int:
     p = sub.add_parser("force"); p.add_argument("id")
     p = sub.add_parser("ready"); p.add_argument("--json", action="store_true")
     sub.add_parser("reviews")
+    p = sub.add_parser("sort"); p.add_argument("--apply", action="store_true", help="write the new priority order (otherwise just show it)")
+    p = sub.add_parser("config"); p.add_argument("action", nargs="?", default="get", choices=["get", "set"]); p.add_argument("key", nargs="?"); p.add_argument("value", nargs="?")
     p = sub.add_parser("pet"); p.add_argument("action", nargs="?", default="list", choices=["list", "set", "say", "off", "on"]); p.add_argument("style", nargs="?"); p.add_argument("--name")
     p = sub.add_parser("replan"); p.add_argument("--from", dest="frm")
     p = sub.add_parser("note"); p.add_argument("id"); p.add_argument("text")
@@ -408,6 +450,30 @@ def main() -> int:
             for k, v in pets["styles"].items():
                 print(("* " if k == cur else "  ") + f"{k:<8} {v['faces'].get('idle', ''):<10} {v['label']} - {v['blurb']}")
             print("\nchoose with: cal.py pet set STYLE [--name NAME]    opt out with: cal.py pet off" + ("    [pet is currently OFF]" if cfg.get("petEnabled") is False else "") + "    (the page also has a Change pet picker)")
+    elif a.cmd == "sort":
+        plan = sort_plan(db)
+        if not plan:
+            print("(nothing to sort)")
+        rank: dict[str, int] = {}
+        for t, score, why in plan:
+            ln = t.get("lane") or "fixed"
+            rank[ln] = rank.get(ln, 0) + 1
+            print(f"{ln:<11} #{rank[ln]:<2} {score:5.1f}  {t['title'][:70]}  [{', '.join(why) or 'by due date'}]{chat_link(t)}")
+            if a.apply:
+                t["prio"] = rank[ln]
+        if a.apply and plan:
+            replan(db, now()); save(db)
+            print("\nsorted: priorities written and the schedule recomputed")
+        elif plan:
+            print("\n(preview only: run with --apply to save this order)")
+    elif a.cmd == "config":
+        cfg = load_cfg()
+        if a.action == "set":
+            if not a.key or a.value is None:
+                sys.exit("usage: cal.py config set KEY VALUE")
+            cfg[a.key] = a.value if a.value not in ("true", "false") else (a.value == "true")
+            CONFIG_FILE.write_text(json.dumps(cfg, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(json.dumps(cfg, indent=2, ensure_ascii=False) if not a.key or a.action == "set" else json.dumps(cfg.get(a.key)))
     elif a.cmd == "reviews":
         rv = [t for t in db["tasks"] if t["status"] == "review"]
         mine = [t for t in db["tasks"] if t["status"] == "open" and t.get("lane") == "owner" and due_dt(t) <= now() and deps_met(db, t)]
