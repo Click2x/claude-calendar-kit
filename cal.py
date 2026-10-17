@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
-Claude Calendar - one shared task calendar for ALL of the owner's projects. Plain JSON, stdlib only, private to this machine.
+Claude Calendar - one shared task calendar for ALL of your projects. Plain JSON, stdlib only, private to this machine.
 
   python cal.py list   [--project NAME] [--all]        open tasks (soonest first); --all adds done/skipped
   python cal.py due    [--project NAME] [--json]       open tasks that are due now or overdue
   python cal.py add --title T --when WHEN [--project NAME] [--cwd DIR] [--prompt TEXT] [--auto] [--repeat daily|weekly|monthly]
-                       [--scheduled-task ID]            WHEN = 2026-11-01 | 2026-11-01T09:00 | tomorrow | +3d | +6h | mon..sun
+                       [--lane L] [--est HOURS] [--prio N] [--after ID ...] [--review] [--scheduled-task ID]
+                       --auto needs --cwd (existing folder) and --prompt; --after ids look like t-YYYYMMDD-NN (see `cal.py list`)
+                       WHEN = 2026-11-01 | 2026-11-01T09:00 | tomorrow | +3d | +6h | mon..sun
   python cal.py show ID
-  python cal.py done ID [--result TEXT]                 marks done; a repeating task schedules its next occurrence
+  python cal.py done ID [--result TEXT] [--followup "TITLE|PROMPT|auto|LANE"]   marks done and can create the next step; a repeating task schedules its next occurrence
   python cal.py skip ID [--result TEXT]
   python cal.py note ID TEXT                            append a note
   python cal.py ready  [--json]                         auto tasks that can start NOW (deps met, due passed, lane free)
@@ -19,11 +21,11 @@ Claude Calendar - one shared task calendar for ALL of the owner's projects. Plai
   python cal.py reviewed ID [--result TEXT]             owner finished reviewing / doing it: done, then replan (pulls dependents forward)
   python cal.py pet [list|say|on|off|set STYLE [--name NAME]]   your calendar pet: pick a style, rename it, or hear what it has to say
   python cal.py sort [--apply]                          re-sort by priority (overdue, unblocks others, waiting on you, quick wins); preview unless --apply
-  python cal.py config [get|set KEY VALUE]              settings in config.json (pet, artifactUrl, hubSession...)
+  python cal.py config [get|set KEY VALUE]              settings in config.json (pet, petEnabled, artifactUrl)
   python cal.py reviews                                 everything waiting on the owner (review + due owner tasks)
   python cal.py force ID                                run this task NOW: ignore its due time, dependencies and notBefore (set by the page's Run now button)
   python cal.py replan [--from WHEN]                    recompute due times: every task starts as soon as its deps and lane are free
-Task extras: after (list of ids), lane (gpu|cpu-7ds|cpu-physkb|owner|fixed), prio (lower first), est (hours), notBefore (iso), fixed (never moved).
+Task extras: after (list of ids), lane (owner = only you can do it | main | any resource name you choose, e.g. cpu, gpu | fixed), prio (lower first), est (hours), notBefore (iso), fixed (never moved).
 
 Tasks live in tasks.json beside this file. `auto` tasks are executed unattended by the scheduled task "calendar-runner"
 (it runs the task's prompt in the task's cwd, then marks it done with a result). A task with --scheduled-task is run by that
@@ -208,8 +210,12 @@ def replan(db: dict, start: datetime) -> None:
             if t.get("fixed") or lane == "fixed":
                 st = due_dt(t)
             else:
-                st = max(start, cursor.get(lane, start), *[end[d] for d in deps if d in end], datetime.fromisoformat(t["notBefore"]) if t.get("notBefore") else start)
-                cursor[lane] = st + timedelta(hours=est_h(t))
+                ready_at = max(start, cursor.get(lane, start), *[end[d] for d in deps if d in end])
+                floor = datetime.fromisoformat(t["notBefore"]) if t.get("notBefore") else start
+                st = max(ready_at, floor)
+                # A task waiting for a date far ahead must not hold the lane: only advance the lane if it really starts soon.
+                if st - ready_at <= timedelta(hours=12):
+                    cursor[lane] = st + timedelta(hours=est_h(t))
             t["due"] = st.replace(microsecond=0).isoformat()
             end[t["id"]] = st + timedelta(hours=est_h(t))
             pending.remove(t)
@@ -358,7 +364,13 @@ def main() -> int:
     elif a.cmd == "add":
         if a.auto and not (a.cwd and a.prompt):
             sys.exit("an --auto task runs unattended, so it needs --cwd (the folder to work in) and --prompt (exactly what it may do)")
+        known = {x["id"] for x in db["tasks"]}
+        bad = [i for i in a.after if i not in known]
+        if bad:
+            sys.exit("unknown task id(s) in --after: " + ", ".join(bad) + "  (ids look like t-YYYYMMDD-NN; see `cal.py list`)")
         cwd = str(Path(a.cwd).expanduser()) if a.cwd else ""
+        if a.auto and not Path(cwd).is_dir():
+            sys.exit(f"--cwd {cwd} is not an existing folder")
         due = parse_when(a.when)
         t = {"id": next_id(db), "title": a.title, "project": a.project, "cwd": cwd, "due": due, "repeat": a.repeat,
              "prompt": a.prompt, "auto": bool(a.auto), "status": "open", "createdAt": now().replace(microsecond=0).isoformat(),
@@ -476,6 +488,8 @@ def main() -> int:
         plan = sort_plan(db)
         if not plan:
             print("(nothing to sort)")
+        else:
+            print("lane        rank  score  task  [why it ranks here]   (higher score = do sooner; ranks are within a lane)")
         rank: dict[str, int] = {}
         for t, score, why in plan:
             ln = t.get("lane") or "fixed"

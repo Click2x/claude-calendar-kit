@@ -123,7 +123,7 @@ python cal.py review ID --result "what to look at and where"   # finished, needs
 python cal.py reviewed ID           # you finished: replans so nothing waits
 python cal.py reviews               # everything waiting on you
 python cal.py sort [--apply]        # rank by priority: overdue, unblocks others, security, quick wins
-python cal.py config set KEY VALUE  # settings: pet, artifactUrl, hubSession
+python cal.py config set KEY VALUE  # settings: pet, petEnabled, artifactUrl
 python cal.py force ID              # run it now, ignoring schedule and dependencies
 python cal.py followup ID --title "Next step" --auto --lane cpu
 python cal.py attach ID SESSION_ID --title "Chat name"
