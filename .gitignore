@@ -1,0 +1,5 @@
+tasks.json
+tasks.json.bak*
+calendar.html
+*.bak
+__pycache__/

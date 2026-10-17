@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "tasks": [
+    {"id": "t-20260101-01", "title": "Weekly review: what got done, what is stuck", "project": "general", "cwd": "", "due": "2026-01-05T09:00:00+00:00", "repeat": "weekly", "prompt": "", "auto": false, "status": "open", "lane": "owner", "prio": 5, "est": 0.5, "createdAt": "2026-01-01T09:00:00+00:00", "scheduledTaskId": null, "notes": [], "result": null, "doneAt": null},
+    {"id": "t-20260101-02", "title": "Write tests for the parser", "project": "my-app", "cwd": "~/code/my-app", "due": "2026-01-01T10:00:00+00:00", "repeat": null, "prompt": "Add tests for the parser module. Do not push. Commit locally on a new branch.", "auto": true, "status": "open", "lane": "cpu", "prio": 10, "est": 1.0, "createdAt": "2026-01-01T09:00:00+00:00", "scheduledTaskId": null, "notes": [], "result": null, "doneAt": null, "reviewOnDone": true},
+    {"id": "t-20260101-03", "title": "Review the parser tests, then merge", "project": "my-app", "cwd": "~/code/my-app", "due": "2026-01-01T12:00:00+00:00", "repeat": null, "prompt": "Read the branch diff and merge if happy.", "auto": false, "status": "open", "lane": "owner", "prio": 5, "est": 0.5, "after": ["t-20260101-02"], "createdAt": "2026-01-01T09:00:00+00:00", "scheduledTaskId": null, "notes": [], "result": null, "doneAt": null}
+  ]
+}

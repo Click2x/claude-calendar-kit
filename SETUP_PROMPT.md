@@ -1,0 +1,13 @@
+# Setup prompt
+
+Paste this into a new Claude Code session on your machine. It sets up the calendar and the prioritization project from this repo.
+
+```text
+Set up the Claude Calendar kit from this repository (https://github.com/Click2x/claude-calendar-kit, or the local copy I give you). Everything stays private to this machine and nothing is sent, posted or published without asking me first.
+
+1. Copy cal.py and render_html.py into ~/.claude/calendar/. Do not copy any tasks.json: start from examples/tasks.example.json, edited to my own projects.
+2. Install templates/calendar-runner.SKILL.md as a scheduled task named "calendar-runner" that runs every 30 minutes, replacing <CALENDAR_DIR> with the real path.
+3. Render the calendar page with render_html.py and publish it as a private artifact. Update that one artifact in place; never create a second.
+4. Set up the "Project prioritization" project from docs-project-prioritization.md in a folder I choose.
+5. Show me the plan first. Ask before connecting any account or reading messages. Tell me what you could not verify.
+```
