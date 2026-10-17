@@ -15,7 +15,7 @@ Claude Calendar - one shared task calendar for ALL of your projects. Plain JSON,
   python cal.py ready  [--json]                         auto tasks that can start NOW (deps met, due passed, lane free)
   python cal.py attach ID SESSION_ID                    link the task to the chat session working on it (the page then shows an Open chat link)
   python cal.py start ID [--session SESSION_ID]                                mark running (the dispatcher calls this before launching a session)
-  python cal.py followup ID --title T [--prompt P] [--auto] [--lane L] [--est H] [--review]   add the next step after task ID (inherits project/cwd/lane, waits on ID)
+  python cal.py followup ID --title T [--prompt P] [--auto] [--cwd DIR] [--lane L] [--est H] [--review]   add the next step after task ID (inherits project/cwd/lane, waits on ID; --auto needs a prompt and a folder)
   done/review/reviewed also take --followup "TITLE|PROMPT|auto|LANE" (repeatable) and create declared `followups` templates
   python cal.py review ID --result TEXT                 auto work finished but needs the owner: status review (does not block dependents)
   python cal.py reviewed ID [--result TEXT]             owner finished reviewing / doing it: done, then replan (pulls dependents forward)
@@ -76,7 +76,10 @@ def parse_when(s: str) -> str:
     if s[:3] in DAYS and len(s) <= 9:
         ahead = (DAYS.index(s[:3]) - n.weekday()) % 7 or 7
         return (n + timedelta(days=ahead)).replace(hour=9, minute=0, second=0, microsecond=0).isoformat()
-    d = datetime.fromisoformat(s.replace("z", "+00:00"))
+    try:
+        d = datetime.fromisoformat(s.replace("z", "+00:00"))
+    except ValueError:
+        sys.exit(f"can't read --when '{s}'. Use 2026-11-01, 2026-11-01T09:00, tomorrow, today, +3d, +6h, +2w or mon..sun")
     if d.tzinfo is None:
         d = d.astimezone() if "t" in s else d.replace(hour=9, minute=0).astimezone()
     return d.replace(microsecond=0).isoformat()
@@ -226,6 +229,10 @@ def replan(db: dict, start: datetime) -> None:
 
 def make_followup(db: dict, parent: dict, f: dict) -> dict:
     """Create the next step after `parent`: inherits project/cwd/lane, waits on parent, replan schedules it."""
+    if f.get("auto"):
+        fcwd = f.get("cwd") or parent.get("cwd", "")
+        if not (f.get("prompt") and fcwd and Path(fcwd).is_dir()):
+            sys.exit(f"follow-up '{f['title']}': an auto task runs unattended, so it needs a prompt (exactly what it may do) and an existing folder (--cwd, or one inherited from the task it follows). Nothing was saved.")
     t = {"id": next_id(db), "title": f["title"], "project": f.get("project") or parent.get("project", "general"),
          "cwd": f.get("cwd") or parent.get("cwd", ""), "due": now().replace(microsecond=0).isoformat(), "repeat": None,
          "prompt": f.get("prompt", ""), "auto": bool(f.get("auto", False)), "status": "open",
@@ -336,7 +343,7 @@ def main() -> int:
         sub.choices[name].add_argument("--followup", action="append", default=[], metavar="TITLE[|PROMPT[|auto|manual[|LANE]]]",
                                        help="create the next step on the calendar when this completes (repeatable)")
     p = sub.add_parser("followup"); p.add_argument("id"); p.add_argument("--title", required=True); p.add_argument("--prompt", default="")
-    p.add_argument("--auto", action="store_true"); p.add_argument("--lane"); p.add_argument("--est", type=float); p.add_argument("--review", action="store_true")
+    p.add_argument("--auto", action="store_true"); p.add_argument("--cwd", default=""); p.add_argument("--lane"); p.add_argument("--est", type=float); p.add_argument("--review", action="store_true")
     p = sub.add_parser("start"); p.add_argument("id"); p.add_argument("--session")
     p = sub.add_parser("attach"); p.add_argument("id"); p.add_argument("session"); p.add_argument("--title", default="")
     p = sub.add_parser("force"); p.add_argument("id")
@@ -426,7 +433,7 @@ def main() -> int:
         save(db); print(fmt(t))
     elif a.cmd == "followup":
         t = find(db, a.id)
-        c = make_followup(db, t, {"title": a.title, "prompt": a.prompt, "auto": a.auto, "lane": a.lane, "est": a.est, "reviewOnDone": a.review})
+        c = make_followup(db, t, {"title": a.title, "prompt": a.prompt, "cwd": a.cwd, "auto": a.auto, "lane": a.lane, "est": a.est, "reviewOnDone": a.review})
         replan(db, now()); save(db); print(fmt(c))
     elif a.cmd == "force":
         t = find(db, a.id)

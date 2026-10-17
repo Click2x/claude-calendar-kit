@@ -90,7 +90,7 @@ flowchart LR
 | [`install.py`](install.py) | The installer: copies files, installs `/next`, seeds tasks, renders the first page. `--dry-run` shows what it would do. |
 | [`pets.json`](pets.json), [`skills/pet/`](skills/pet/SKILL.md) | An **optional** pet in six styles (waifu, kitten, robot, blob, emoji, plain). It reacts to your tasks on the page and opens `/next`. Pick a style on the page, with `/pet`, or `cal.py pet set STYLE`. Opt out any time with `cal.py pet off` or `install.py --no-pet`. |
 | [`docs-chat-links.md`](docs-chat-links.md) | The "every waiting item gets a one-click chat link" rule, and how `cal.py attach` and the CLI output support it. |
-| [`SETUP_PROMPT.md`](SETUP_PROMPT.md) | A longer paste-in prompt, if you prefer that to the link. |
+| [`SETUP_PROMPT.md`](SETUP_PROMPT.md) | The one-line paste-in prompt, if you prefer it to copying from the README. |
 | [`examples/tasks.example.json`](examples/tasks.example.json) | A starting `tasks.json`. |
 
 ## Quick start
@@ -125,7 +125,7 @@ python cal.py reviews               # everything waiting on you
 python cal.py sort [--apply]        # rank by priority: overdue, unblocks others, security, quick wins
 python cal.py config set KEY VALUE  # settings: pet, petEnabled, artifactUrl
 python cal.py force ID              # run it now, ignoring schedule and dependencies
-python cal.py followup ID --title "Next step" --auto --lane cpu
+python cal.py followup ID --title "Next step" --auto --prompt "..." --lane cpu
 python cal.py attach ID SESSION_ID --title "Chat name"
 ```
 
