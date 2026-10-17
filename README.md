@@ -59,7 +59,7 @@ flowchart LR
 | **`auto` tasks** | You pre-authorized exactly what the prompt says. Anything needing money, accounts, credentials or irreversible steps is blocked for you, never run. |
 | **Review** | Status `review` means finished but needs you. It does not block dependents. |
 | **Follow-ups** | `done --followup "TITLE|PROMPT|auto|LANE"` or `cal.py followup` creates the next step, inheriting project, folder and lane. |
-| **Chat links** | `cal.py attach ID SESSION` links a task to the chat working on it, so the page and `/next` can point you at it. |
+| **Chat links** | `cal.py attach ID SESSION` links a task to its chat. Follow-ups inherit it, `cal.py` prints `-> chat: [title](#session)` for you to paste, and Claude is told to include one for anything waiting on you. See [`docs-chat-links.md`](docs-chat-links.md). |
 
 ## What is in the box
 
@@ -73,6 +73,7 @@ flowchart LR
 | [`INSTALL.md`](INSTALL.md) | Step-by-step install guide written for Claude to follow from the repo link alone. |
 | [`install.py`](install.py) | The installer: copies files, installs `/next`, seeds tasks, renders the first page. `--dry-run` shows what it would do. |
 | [`pets.json`](pets.json), [`skills/pet/`](skills/pet/SKILL.md) | An **optional** pet in six styles (waifu, kitten, robot, blob, emoji, plain). It reacts to your tasks on the page and opens `/next`. Pick a style on the page, with `/pet`, or `cal.py pet set STYLE`. Opt out any time with `cal.py pet off` or `install.py --no-pet`. |
+| [`docs-chat-links.md`](docs-chat-links.md) | The "every waiting item gets a one-click chat link" rule, and how `cal.py attach` and the CLI output support it. |
 | [`SETUP_PROMPT.md`](SETUP_PROMPT.md) | A longer paste-in prompt, if you prefer that to the link. |
 | [`examples/tasks.example.json`](examples/tasks.example.json) | A starting `tasks.json`. |
 

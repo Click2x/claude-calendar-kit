@@ -53,6 +53,10 @@ Offer to create the companion project from `docs-project-prioritization.md` (`py
 
 Then tell the user, in a few plain lines: what is installed, what is scheduled, what you could not do, and that they must **open a new chat and type `/next`**, because skills are loaded when a chat starts.
 
+## 6b. Chat links (offer)
+
+Read `docs-chat-links.md`. Offer to remember its rule as a standing preference (memory or `~/.claude/CLAUDE.md`): whenever something is waiting on them, include a one-click link to its chat. Do it only if they say yes.
+
 ## Ask first
 
 - Connecting any account or reading messages or mail.

@@ -12,7 +12,7 @@ The user typed /next. Give them the open items from their shared Claude Calendar
    - For a task that has a chat, read its "session" and "sessionTitle" with `python cal.py show ID`. A task without a session has no chat yet.
 1b. Run `python cal.py pet say`. If it prints something, that is the user's calendar pet speaking: open your answer with that line on its own (the face and the words, exactly as printed), then continue in your own voice. If it prints nothing, the user has no pet or turned it off: skip this and never mention it.
 2. Present it in this order, newest and most important first, and keep it short:
-   - **Waiting on you** (status review, or the user's own tasks that are ready): one line each, what it is and what you need from them. Give each chat as a clickable link: `[chat title](#local_<session id>)`. Never paste a bare `claude://` link, since that needs copy and paste.
+   - **Waiting on you** (status review, or the user's own tasks that are ready): one line each, what it is and what you need from them. Give each chat as a clickable link: `[chat title](#local_<session id>)`. Never paste a bare `claude://` link, since that needs copy and paste. `cal.py list` and `cal.py reviews` already print `-> chat: [title](#session)`: use those as they are. Apply this to every mention of a waiting item in this reply, including any "waiting for your go" line, and say plainly when something has no chat yet.
    - **Running now**: one line each, with the chat link.
    - **Ready next**: the top three, so they can see the queue.
    - If something has no chat yet, say so and offer to start one.

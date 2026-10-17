@@ -100,7 +100,16 @@ def fmt(t: dict) -> str:
     flag = {"open": " ", "done": "x", "skipped": "-", "blocked": "!", "running": ">", "review": "?"}.get(t["status"], "?")
     over = " OVERDUE" if t["status"] == "open" and d < now() else ""
     mode = "auto" if t.get("auto") else ("sched" if t.get("scheduledTaskId") else "manual")
-    return f"[{flag}] {t['id']}  {d:%Y-%m-%d %H:%M}  {t.get('project', '-'):<12} {mode:<6} {t['title']}{over}"
+    return f"[{flag}] {t['id']}  {d:%Y-%m-%d %H:%M}  {t.get('project', '-'):<12} {mode:<6} {t['title']}{over}{chat_link(t)}"
+
+
+def chat_link(t: dict) -> str:
+    """Markdown link to the chat working on a task. Paste it as-is into a reply: in the Claude app it opens with one click.
+    (A bare claude:// URL is not clickable, so we print the in-app form.) Empty when the task has no chat yet."""
+    sid = t.get("session")
+    if not sid:
+        return ""
+    return f"  -> chat: [{t.get('sessionTitle') or t['title']}](#{sid})"
 
 
 def advance(t: dict) -> str | None:
@@ -215,6 +224,9 @@ def make_followup(db: dict, parent: dict, f: dict) -> dict:
          "createdAt": now().replace(microsecond=0).isoformat(), "scheduledTaskId": None, "notes": [], "result": None, "doneAt": None,
          "lane": f.get("lane") or ("owner" if not f.get("auto") else parent.get("lane")), "prio": f.get("prio", parent.get("prio", 50)),
          "est": f.get("est"), "after": [parent["id"]] + [x for x in f.get("after", []) if x != parent["id"]], "followupOf": parent["id"]}
+    if parent.get("session"):
+        t["session"] = parent["session"]
+        t["sessionTitle"] = parent.get("sessionTitle", "")
     if f.get("reviewOnDone"):
         t["reviewOnDone"] = True
     db["tasks"].append(t)
