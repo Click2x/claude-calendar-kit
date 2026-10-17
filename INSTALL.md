@@ -31,7 +31,7 @@ Ask the user, in one short message, for what you cannot guess: which projects th
 
 ## 3. Register the dispatcher
 
-Create a scheduled task named `calendar-runner` that runs every 30 minutes, using the text of `~/.claude/calendar/calendar-runner.SKILL.md` as its instructions. Use whatever scheduling the Claude app offers (for Claude Code desktop, the scheduled-tasks tool). If scheduling is not available, tell the user plainly, and leave the calendar working by hand (`/next` and the `cal.py` commands still work).
+Create a scheduled task named `calendar-runner` that runs every 30 minutes, using the text of `~/.claude/calendar/calendar-runner.SKILL.md` as its instructions. Use whatever scheduling the Claude app offers (for Claude Code desktop, the scheduled-tasks tool). The page shows a countdown to the next tick. Read the task's `jitterSeconds` from the scheduler's listing and put it in `~/.claude/calendar/dispatcher.json` (`{"minutes": [14, 44], "jitterSeconds": <n>}`), then re-render. If scheduling is not available, tell the user plainly, and leave the calendar working by hand (`/next` and the `cal.py` commands still work).
 
 ## 4. Publish the page (optional, ask first)
 

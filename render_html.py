@@ -174,6 +174,7 @@ function render(){
   var late=live.filter(isLate).length,week=live.filter(function(t){return t.d>=now&&t.d-now<7*864e5}).length;
   var top=el('div','top'),l=el('div');l.appendChild(el('h1',null,'Claude Calendar'));
   l.appendChild(el('div','sub',late+' overdue · '+week+' in the next 7 days · '+live.length+' open · updated '+now.toLocaleString(undefined,{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})));
+  var tk=el('div','sub tick');tk.id='tick';l.appendChild(tk);
   top.appendChild(l);
   var tools=el('div','tools'),tb=el('button',null,'Today');tb.onclick=function(){st.sel=todayKey;st.y=now.getFullYear();st.m=now.getMonth();render()};
   var fv=el('button',null,st.full?'Compact view':'Full view');fv.setAttribute('aria-pressed',String(st.full));
@@ -200,6 +201,12 @@ function render(){
   app.appendChild(el('p','foot','Click a date for its outline. Auto tasks are dispatched by the calendar runner every 30 minutes (:14 and :44) while the Claude app is open; each lane runs one task at a time.'));
 }
 render();
+function nextTick(){var d=D.dispatcher||{},mins=d.minutes||[],j=(d.jitterSeconds||0)*1000;if(!mins.length)return null;
+  var n=Date.now(),best=null;for(var h=0;h<3;h++){var base=new Date(n);base.setMinutes(0,0,0);base.setHours(base.getHours()+h-1);
+    mins.forEach(function(m){var t=base.getTime()+m*60000+j;if(t>n&&(best===null||t<best))best=t})}return best}
+setInterval(function(){var e=document.getElementById('tick');if(!e)return;var t=nextTick();
+  if(!t){e.textContent='';return}var s=Math.max(0,Math.round((t-Date.now())/1000)),m=Math.floor(s/60);
+  e.textContent='Next dispatch in '+m+':'+pad(s%60)+' (about '+hm(new Date(t))+')'},1000);
 })();
 """
 
@@ -213,7 +220,14 @@ def main() -> int:
         o = {k: t.get(k) for k in keep}
         o["sched"] = t.get("scheduledTaskId")
         tasks.append(o)
-    data = json.dumps({"generated": now.isoformat(), "tasks": tasks}, ensure_ascii=False).replace("</", "<\\/")
+    disp = {}
+    dj = HERE / "dispatcher.json"
+    if dj.exists():
+        try:
+            disp = json.loads(dj.read_text(encoding="utf-8"))
+        except ValueError:
+            disp = {}
+    data = json.dumps({"generated": now.isoformat(), "tasks": tasks, "dispatcher": disp}, ensure_ascii=False).replace("</", "<\\/")
     page = "\n".join([
         "<title>Claude Calendar</title>", '<meta name="claude:viewport-fit-sides" content="cover">',
         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">',

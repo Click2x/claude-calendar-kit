@@ -66,7 +66,7 @@ flowchart LR
 | File | What it is |
 | --- | --- |
 | [`cal.py`](cal.py) | The command line. `tasks.json` (not in this repo) is the source of truth. |
-| [`render_html.py`](render_html.py) | Renders a self-contained interactive calendar page: month grid, day outline, up-next list, a **Run now** button for auto tasks, chat links, and a small mascot that reacts to your task state. |
+| [`render_html.py`](render_html.py) | Renders a self-contained interactive calendar page: month grid, day outline, up-next list, a **Run now** button for auto tasks, chat links, a countdown to the next dispatcher tick, and a small mascot that reacts to your task state. |
 | [`templates/calendar-runner.SKILL.md`](templates/calendar-runner.SKILL.md) | The dispatcher. Run it as a scheduled task every 30 minutes. |
 | [`skills/next/SKILL.md`](skills/next/SKILL.md) | The `/next` skill. Copy it to `~/.claude/skills/next/`. |
 | [`docs-project-prioritization.md`](docs-project-prioritization.md) | A companion project that triages received messages, cleans up the calendar, nudges you about neglected projects and suggests new ones. |

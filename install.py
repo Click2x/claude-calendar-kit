@@ -48,6 +48,8 @@ def main() -> int:
         t = (HERE / "templates" / "calendar-runner.SKILL.md").read_text(encoding="utf-8")
         (cal / "calendar-runner.SKILL.md").write_text(t.replace("<CALENDAR_DIR>", cal.as_posix()), encoding="utf-8")
 
+    if not (cal / "dispatcher.json").exists():
+        do(f"write {cal / 'dispatcher.json'} (when the dispatcher ticks, for the page's countdown)", lambda: (cal / "dispatcher.json").write_text('{"minutes": [14, 44], "jitterSeconds": 0}\n', encoding="utf-8"))
     do(f"write dispatcher instructions -> {cal / 'calendar-runner.SKILL.md'}", runner)
     if a.project_dir:
         pd = Path(a.project_dir).expanduser()
