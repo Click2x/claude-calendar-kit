@@ -41,9 +41,21 @@ Create a scheduled task named `calendar-runner` that runs every 30 minutes, usin
 
 Render with `python render_html.py`. Offer to publish `~/.claude/calendar/calendar.html` as a **private** artifact and keep updating that one artifact in place. If they decline, tell them they can open the HTML file locally.
 
-## 5. Project prioritization (optional)
+## 5. Project prioritization (optional, default: skip)
 
-Offer to create the companion project from `docs-project-prioritization.md` (`python install.py --project-dir <folder>`). It reads received messages, cleans up the calendar and suggests new projects. Do not connect any mail or message account until the user says yes, one account at a time.
+This is a separate, optional extra. It is called **Project prioritization**. Do not call it "message triage" or any other name, and do not describe it as something you are about to do. Ask the user in plain words, once, and treat anything but a clear yes as no:
+
+> Want an optional extra called **Project prioritization**? It's a chat that helps you decide what to work on. It can:
+> - point out projects you haven't touched in a while and ask what's blocking them,
+> - tidy your calendar (overdue, duplicate or stale items) and propose changes for you to approve,
+> - suggest new project ideas based on what you already work on, and
+> - if you want, look through your recent messages and turn the ones that need action into calendar tasks.
+>
+> It never sends, replies to, deletes or archives anything, and it asks before connecting any account. Skip it and nothing changes. Want it?
+
+- If **no** (or no clear answer): do nothing and do not ask again.
+- If **yes**: run `python install.py --project-dir <folder>` (ask them where, or suggest `~/projects/prioritization`), then tell them to open that folder as a chat.
+- The messages part is separate from the rest. Ask a second question before it: "Do you also want it to look through your messages? That means connecting your mail or messages." Connect nothing unless they say yes, and then only the one account they name. If they say no, leave out job 1 in the folder's README.
 
 ## 6. Check your work
 
