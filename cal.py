@@ -90,6 +90,13 @@ def parse_when(s: str) -> str:
     return d.replace(microsecond=0).isoformat()
 
 
+GRACE = timedelta(minutes=15)  # a task is only "overdue" once it is this far past its time, so a task made a moment ago never is
+
+
+def is_overdue(t: dict) -> bool:
+    return t["status"] == "open" and due_dt(t) < now() - GRACE
+
+
 def due_dt(t: dict) -> datetime:
     return datetime.fromisoformat(t["due"])
 
@@ -110,7 +117,7 @@ def find(db: dict, tid: str) -> dict:
 def fmt(t: dict) -> str:
     d = due_dt(t)
     flag = {"open": " ", "done": "x", "skipped": "-", "blocked": "!", "running": ">", "review": "?"}.get(t["status"], "?")
-    over = " OVERDUE" if t["status"] == "open" and d < now() else ""
+    over = " OVERDUE" if is_overdue(t) else ""
     mode = "auto" if t.get("auto") else ("sched" if t.get("scheduledTaskId") else "manual")
     return f"[{flag}] {t['id']}  {d:%Y-%m-%d %H:%M}  {t.get('project', '-'):<12} {mode:<6} {t['title']}{over}{chat_link(t)}"
 
@@ -155,7 +162,7 @@ def pet_state(db: dict) -> tuple[str, int]:
     ts = db["tasks"]
     review = sum(1 for t in ts if t["status"] == "review")
     blocked = sum(1 for t in ts if t["status"] == "blocked")
-    late = sum(1 for t in ts if t["status"] == "open" and due_dt(t) < now())
+    late = sum(1 for t in ts if is_overdue(t))
     running = sum(1 for t in ts if t["status"] == "running")
     for mood, n in (("review", review), ("blocked", blocked), ("late", late), ("running", running)):
         if n:
@@ -278,7 +285,7 @@ def sort_plan(db: dict) -> list[tuple[dict, float, list[str]]]:
         if t["status"] not in ("open", "blocked") or t.get("fixed") or (t.get("lane") or "") == "fixed":
             continue
         score, why = 0.0, []
-        late_days = (now() - due_dt(t)).total_seconds() / 86400
+        late_days = (now() - GRACE - due_dt(t)).total_seconds() / 86400
         if late_days > 0:
             score += min(10.0, 3.0 + late_days * 2)
             why.append("overdue")
