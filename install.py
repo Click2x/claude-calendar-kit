@@ -24,7 +24,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--home", default=str(Path.home()), help="home directory to install under (default: your home)")
     ap.add_argument("--project-dir", help="also create the Project prioritization folder here")
-    ap.add_argument("--pet", default=None, help="pet style to start with (waifu, kitten, robot, blob, emoji, plain), or 'none' for no pet (default: none until you choose) (see pets.json; change any time with cal.py pet)")
+    ap.add_argument("--pet", default=None, help="pet style to start with (kitten, robot, blob, emoji, plain), or 'none' for no pet (default: none until you choose) (see pets.json; change any time with cal.py pet)")
     ap.add_argument("--no-pet", action="store_true", help="same as --pet none")
     ap.add_argument("--dry-run", action="store_true", help="show what would happen and change nothing")
     a = ap.parse_args()

@@ -33,7 +33,7 @@ Run this as a guided conversation. **One step per message**, short, with numbere
 **B2. Pets are cool! Want one?**
 
 > 1. Yes
->    1A. What kind? (waifu, kitten, robot, blob, emoji, plain. Run `python cal.py pet` to show faces.)
+>    1A. What kind? (kitten, robot, blob, emoji, plain. Run `python cal.py pet` to show faces.)
 > 2. No
 
 Yes: `python cal.py pet set STYLE [--name NAME]`, then show `cal.py pet say`. Then offer once, in one line: **"Want your pet to sit above the text box too, so you see it all the time?"** On a yes, install the small `calendar-pet` add-on from this repository: `claude plugin install calendar-pet --marketplace Click2x/claude-calendar-kit` (answer `y` to adding the marketplace). If you cannot run that, tell them: in the Claude app click **+** next to the prompt box, then **Plugins**, **Add marketplace** with `Click2x/claude-calendar-kit`, then **Add plugin** `calendar-pet`. It shows the same line as `cal.py pet say`, and is active right away or in the next chat (a full restart is not needed). Installing it is a yes-first step like any other. If they decline the add-on only, keep the pet and do not ask again. **No (to the pet itself):** `python cal.py pet off`, and never mention the pet again.

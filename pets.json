@@ -1,21 +1,7 @@
 {
   "version": 1,
-  "default": "waifu",
+  "default": "kitten",
   "styles": {
-    "waifu": {
-      "label": "Waifu",
-      "blurb": "Sweet, devoted, a little dramatic",
-      "name": "Mochi",
-      "faces": {"idle": "(｡･ω･｡)", "running": "(๑•̀ㅂ•́)و✧", "review": "(⌒▽⌒)♡", "blocked": "(´;ω;`)", "late": "(>_<)", "sleepy": "(－ω－) zzZ"},
-      "lines": {
-        "idle": ["All quiet. Waiting for you, master~", "{name} is here whenever you need her~"],
-        "running": ["{n} running right now. I'm cheering for them!", "Ganbare, ganbare! {n} in progress~"],
-        "review": ["{n} thing{s} ready for your review, master! Please look~", "Ahh, {n} waiting for you! Come see, come see~"],
-        "blocked": ["{n} task{s} blocked and needs you...", "Master... {n} is stuck. Help?"],
-        "late": ["{n} overdue... ganbatte!", "Um, {n} slipped past its time. It's okay, we can fix it!"],
-        "sleepy": ["Zzz... it's late. Everything can wait till morning~", "{name} is sleepy... go rest?"]
-      }
-    },
     "kitten": {
       "label": "Kitten",
       "blurb": "Curious, a bit smug",
