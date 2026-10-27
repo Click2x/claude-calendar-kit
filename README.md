@@ -10,6 +10,9 @@ Lanes, dependencies, a review queue, automatic follow-ups, and a `/next` command
 ![private](https://img.shields.io/badge/data-stays%20on%20your%20machine-7a4fb5)
 ![license](https://img.shields.io/badge/license-MIT-0b6e8a)
 
+<img src="docs/images/calendar-light.png#gh-light-mode-only" alt="The calendar page: month grid, today's tasks, up next and a pet" width="88%">
+<img src="docs/images/calendar-dark.png#gh-dark-mode-only" alt="The calendar page in dark mode" width="88%">
+
 </div>
 
 ---
